@@ -2,6 +2,7 @@ const url = require('url')
 const path = require('path')
 const Layer = require('./layer')
 const Route = require('./route')
+const methods = require('methods')
 
 function Router() {
   this.stack = []
@@ -15,10 +16,13 @@ Router.prototype.route = function(path) {
   return route
 }
 
-Router.prototype.get = function(path, handlers) {
-  const route = this.route(path)
-  route.get(handlers)
-}
+methods.forEach(method => {
+  Router.prototype[method] = function(path, handlers) {
+    const route = this.route(path)
+    route[method](handlers)
+  }
+})
+
 
 Router.prototype.handle = function(req, res, out) {
   const { pathname } = url.parse(req.url) // 请求路径

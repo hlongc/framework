@@ -1,4 +1,5 @@
 const Layer = require('./layer')
+const methods = require('methods')
 
 function Route() {
   this.stack = []
@@ -19,12 +20,14 @@ Route.prototype.dispatch = function(req, res, out) { // out就是外层的dispat
   dispatch()
 }
 
-Route.prototype.get = function(handlers) {
-  handlers.forEach(fn => {
-    const layer = new Layer('/', fn)
-    layer.method = 'get'
-    this.stack.push(layer)
-  })
-}
+methods.forEach(method => {
+  Route.prototype[method] = function(handlers) {
+    handlers.forEach(fn => {
+      const layer = new Layer('/', fn)
+      layer.method = method
+      this.stack.push(layer)
+    })
+  }
+})
  
 module.exports = Route

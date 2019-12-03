@@ -1,13 +1,16 @@
 const http = require('http')
 const Router = require('./router')
+const methods = require('methods')
 
 function Application() {
   this._router = new Router
 }
 
-Application.prototype.get = function(path, ...handlers) { // 可能是传入多个处理函数
-  this._router.get(path, handlers)
-}
+methods.forEach(method => {
+  Application.prototype[method] = function(path, ...handlers) { // 可能是传入多个处理函数
+    this._router[method](path, handlers)
+  }
+})
 
 Application.prototype.listen = function() {
   const server = http.createServer((req, res) => {
