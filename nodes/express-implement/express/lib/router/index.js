@@ -16,6 +16,17 @@ Router.prototype.route = function(path) {
   return route
 }
 
+// 如果path为function，则表示没传入路径，则默认'/'
+Router.prototype.use = function(path, handler) {
+  if (typeof path === 'function') {
+    handler = path
+    path = '/'
+  }
+  const layer = new Layer(path, handler)
+  layer.route = undefined // route为undefined表示当前layer为中间件，反之为路由
+  this.stack.push(layer) // 中间件是放在最顶部的
+}
+
 methods.forEach(method => {
   Router.prototype[method] = function(path, handlers) {
     const route = this.route(path)
@@ -30,8 +41,14 @@ Router.prototype.handle = function(req, res, out) {
   const dispatch = () => {
     if (index === this.stack.length) return out() // 如果到最后都没匹配成功，就交给外层的应用层处理
     const layer = this.stack[index++]
-    if (layer.match(pathname) && layer.route.methods[req.method.toLowerCase()]) { // 如果路径匹配成功并且当前包含这个方法，那么就让handler执行
-      layer.handle_request(req, res, dispatch) // route.dispatch
+    if (layer.match(pathname)) {
+      if (layer.route) { // 如果route不为undefined，则表示当前layer是路由，否则为中间件
+        if (layer.route.methods[req.method.toLowerCase()]) { // 判断方法是否匹配成功
+          layer.handle_request(req, res, dispatch)
+        }
+      } else { // 中间件直接执行方法
+        layer.handle_request(req, res, dispatch)
+      }
     } else { // 如果匹配失败，那么让下一个layer继续匹配
       dispatch()
     }
