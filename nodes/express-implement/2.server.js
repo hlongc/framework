@@ -1,8 +1,8 @@
-const express = require('express')
+const express = require('./express')
 
 const app = express()
 
-app.get('/', function(req, res, next) {
+app.get('/a', function(req, res, next) {
   console.log(1)
   next()
 }, function(req, res, next) {
@@ -18,7 +18,11 @@ app.get('/', function(req, res, next) {
 
 app.get('/a', function(req, res, next) {
   console.log(2)
-  res.end('ok')
+  res.end('get a')
+})
+
+app.post('/a', function(req, res, next) {
+  res.end('post a')
 })
 
 app.listen(3000, function() {

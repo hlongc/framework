@@ -27,10 +27,10 @@ methods.forEach(method => {
 Router.prototype.handle = function(req, res, out) {
   const { pathname } = url.parse(req.url) // 请求路径
   let index = 0
-  function dispatch() {
+  const dispatch = () => {
     if (index === this.stack.length) return out() // 如果到最后都没匹配成功，就交给外层的应用层处理
     const layer = this.stack[index++]
-    if (layer.match(pathname)) { // 如果路径匹配成功，那么就让handler执行
+    if (layer.match(pathname) && layer.route.methods[req.method.toLowerCase()]) { // 如果路径匹配成功并且当前包含这个方法，那么就让handler执行
       layer.handle_request(req, res, dispatch) // route.dispatch
     } else { // 如果匹配失败，那么让下一个layer继续匹配
       dispatch()
