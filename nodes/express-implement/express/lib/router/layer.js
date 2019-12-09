@@ -12,6 +12,14 @@ Layer.prototype.match = function(pathname) {
   return false // 既不是中间件并且路径匹配失败返回false
 }
 
+Layer.prototype.handle_error = function(err, req, res, next) {
+  if (this.handler.length === 4) { // 中间件参数为4个才是错误处理中间件
+    this.handler(err, req, res, next)
+  } else { // 如果不是错误处理中间件则继续寻找
+    next(err)
+  }
+}
+
 Layer.prototype.handle_request = function(req, res, next) {
   this.handler(req, res, next)
 }

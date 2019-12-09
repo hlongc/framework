@@ -38,19 +38,29 @@ methods.forEach(method => {
 Router.prototype.handle = function(req, res, out) {
   const { pathname } = url.parse(req.url) // 请求路径
   let index = 0
-  const dispatch = () => {
+  const dispatch = (err) => {
     if (index === this.stack.length) return out() // 如果到最后都没匹配成功，就交给外层的应用层处理
     const layer = this.stack[index++]
-    if (layer.match(pathname)) {
-      if (layer.route) { // 如果route不为undefined，则表示当前layer是路由，否则为中间件
-        if (layer.route.methods[req.method.toLowerCase()]) { // 判断方法是否匹配成功
-          layer.handle_request(req, res, dispatch)
-        }
-      } else { // 中间件直接执行方法
-        layer.handle_request(req, res, dispatch)
+    if (err) { // 如果发生错误，找到错误处理中间件来处理错误
+      if (!layer.route) { // 当前为中间件，则交给layer自己处理
+        layer.handle_error(err, req, res, dispatch)
+      } else { // 如果为路由，则继续寻找
+        dispatch(err)
       }
-    } else { // 如果匹配失败，那么让下一个layer继续匹配
-      dispatch()
+    } else {
+      if (layer.match(pathname)) {
+        if (layer.route) { // 如果route不为undefined，则表示当前layer是路由，否则为中间件
+          if (layer.route.methods[req.method.toLowerCase()]) { // 判断方法是否匹配成功
+            layer.handle_request(req, res, dispatch)
+          }
+        } else { // 中间件直接执行方法
+          if (layer.handler.length !== 4) { // 跳过错误处理中间件
+            layer.handle_request(req, res, dispatch)
+          }
+        }
+      } else { // 如果匹配失败，那么让下一个layer继续匹配
+        dispatch()
+      }
     }
   }
   dispatch()

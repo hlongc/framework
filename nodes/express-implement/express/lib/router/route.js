@@ -9,7 +9,8 @@ function Route() {
 Route.prototype.dispatch = function(req, res, out) { // out就是外层的dispatch，用于跳出当前route
   let index = 0
   const reqMethod = req.method.toLowerCase()
-  const dispatch = () => {
+  const dispatch = (err) => {
+    if (err) return out(err) // 如果发生错误则抛出错误跳出去
     if (index === this.stack.length) return out() // 如果route中都没匹配到，那么回到上一级的router进行下一轮匹配
     const layer = this.stack[index++]
     if (layer.method === reqMethod) {
@@ -26,7 +27,7 @@ methods.forEach(method => {
     handlers.forEach(fn => {
       const layer = new Layer('/', fn)
       layer.method = method
-      this.methods[method] = true
+      this.methods[method] = true // 保存当前route中所包含的请求方法
       this.stack.push(layer)
     })
   }
