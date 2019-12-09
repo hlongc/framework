@@ -2,12 +2,18 @@ const http = require('http')
 const Router = require('./router')
 const methods = require('methods')
 
-function Application() {
-  this._router = new Router
+function Application() {}
+
+// 路由系统懒加载，当有请求来临时才加载路由系统，因为有可能不会接收到请求
+Application.prototype.lazyRouter = function() {
+  if (!this._router) {
+    this._router = new Router
+  }
 }
 
 methods.forEach(method => {
   Application.prototype[method] = function(path, ...handlers) { // 可能是传入多个处理函数
+    this.lazyRouter()
     this._router[method](path, handlers)
   }
 })
@@ -19,6 +25,7 @@ Application.prototype.listen = function() {
       res.setHeader('Content-Type', 'text/html ;charset=utf-8')
       res.end(`Cannot ${req.method} ${req.url}`)
     }
+    this.lazyRouter()
     this._router.handle(req, res, done)
   })
   server.listen(...arguments)
