@@ -4,11 +4,19 @@ const Layer = require('./layer')
 const Route = require('./route')
 const methods = require('methods')
 
+const proto = {}
+
 function Router() {
-  this.stack = []
+  const router = (req, res, next) => {
+    router.handle(req, res, next)
+  }
+  router.stack = []
+  router.__proto__ = proto // 通过原型链来查找方法
+  return router
 }
 
-Router.prototype.route = function(path) {
+
+proto.route = function(path) {
   const route = new Route()
   const layer = new Layer(path, route.dispatch.bind(route)) // 让layer保存路径和route.dispatch
   layer.route = route // route属性代表当前是个路由
@@ -17,7 +25,7 @@ Router.prototype.route = function(path) {
 }
 
 // 如果path为function，则表示没传入路径，则默认'/'
-Router.prototype.use = function(path, handler) {
+proto.use = function(path, handler) {
   if (typeof path === 'function') {
     handler = path
     path = '/'
@@ -28,19 +36,24 @@ Router.prototype.use = function(path, handler) {
 }
 
 methods.forEach(method => {
-  Router.prototype[method] = function(path, handlers) {
+  proto[method] = function(path, handlers) {
     const route = this.route(path)
     route[method](handlers)
   }
 })
 
 
-Router.prototype.handle = function(req, res, out) {
+proto.handle = function(req, res, out) {
   const { pathname } = url.parse(req.url) // 请求路径
   let index = 0
+  let removePath = ''
   const dispatch = (err) => {
     if (index === this.stack.length) return out() // 如果到最后都没匹配成功，就交给外层的应用层处理
     const layer = this.stack[index++]
+    if (removePath) { // 如果不为空，说明之前匹配二级路由时删除过，现在补全
+      req.url = removePath + req.url
+      removePath = ''
+    }
     if (err) { // 如果发生错误，找到错误处理中间件来处理错误
       if (!layer.route) { // 当前为中间件，则交给layer自己处理
         layer.handle_error(err, req, res, dispatch)
@@ -55,6 +68,10 @@ Router.prototype.handle = function(req, res, out) {
           }
         } else { // 中间件直接执行方法
           if (layer.handler.length !== 4) { // 跳过错误处理中间件
+            if (layer.path !== '/') { // 如果就是 '/' 那就不用删除，否则匹配失败
+              removePath = layer.path // 删除之前先记录，在下一层layer匹配时复原回去，否则后面匹配失败
+              req.url = req.url.slice(removePath.length) // 二级路由匹配时，需要删除上一级的路径，否则匹配失败 /user/add => /add
+            }
             layer.handle_request(req, res, dispatch)
           }
         }
