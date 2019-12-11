@@ -1,9 +1,20 @@
+const pathToRegExp = require('path-to-regexp')
+
 function Layer(path, handler) {
   this.path = path
   this.handler = handler // 这里保存的是route.dispatch 真正处理的请求的方法
+  // 把路径转换为正则表达式
+  this.reg = pathToRegExp(this.path, this.keys = [])
 }
 
 Layer.prototype.match = function(pathname) {
+  const match = pathname.match(this.reg) // 先用正则匹配路径
+  if (match) { // 如果匹配成功 则保存当前params并且返回ture
+    // 两个数组合并成对象 match:[xxx,1,2] + this.keys[{name:id},{name:name}]  => {id:1,name:2}
+    this.params = this.keys.reduce((memo, cur, index) => (memo[cur.name] = match[index + 1],memo), {})
+    console.log(this.params)
+    return true
+  }
   if (this.path === pathname) return true
   if (!this.route) { // 如果当前是中间件的话，则匹配当前路径是否以this.path开头
     if (this.path === '/') return true // /匹配任何路径

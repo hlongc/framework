@@ -64,6 +64,7 @@ proto.handle = function(req, res, out) {
       if (layer.match(pathname)) {
         if (layer.route) { // 如果route不为undefined，则表示当前layer是路由，否则为中间件
           if (layer.route.methods[req.method.toLowerCase()]) { // 判断方法是否匹配成功
+            req.params = layer.params
             layer.handle_request(req, res, dispatch)
           }
         } else { // 中间件直接执行方法

@@ -23,7 +23,7 @@ Route.prototype.dispatch = function(req, res, out) { // out就是外层的dispat
 }
 
 methods.forEach(method => {
-  Route.prototype[method] = function(...handlers) {
+  Route.prototype[method] = function(handlers) {
     handlers.forEach(fn => {
       const layer = new Layer('/', fn)
       layer.method = method
