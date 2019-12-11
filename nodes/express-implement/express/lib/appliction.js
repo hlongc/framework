@@ -16,6 +16,11 @@ Application.prototype.use = function(path, handler) {
   this._router.use(path, handler) // 交给路由系统来处理
 }
 
+Application.prototype.param = function(key, handler) {
+  this.lazyRouter()
+  this._router.param(key, handler) // 交给路由系统来处理
+}
+
 methods.forEach(method => {
   Application.prototype[method] = function(path, ...handlers) { // 可能是传入多个处理函数
     this.lazyRouter()

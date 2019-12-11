@@ -4,7 +4,7 @@ function Layer(path, handler) {
   this.path = path
   this.handler = handler // 这里保存的是route.dispatch 真正处理的请求的方法
   // 把路径转换为正则表达式
-  this.reg = pathToRegExp(this.path, this.keys = [])
+  this.reg = pathToRegExp(this.path, this.keys = []) // 如果layer上面的keys不为空数组，那么说明是普通路由
 }
 
 Layer.prototype.match = function(pathname) {

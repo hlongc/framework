@@ -11,6 +11,7 @@ function Router() {
     router.handle(req, res, next)
   }
   router.stack = []
+  router.paramCallback = {} // { id: [fn, fn], name: [fn] }
   router.__proto__ = proto // 通过原型链来查找方法
   return router
 }
@@ -33,6 +34,36 @@ proto.use = function(path, handler) {
   const layer = new Layer(path, handler)
   layer.route = undefined // route为undefined表示当前layer为中间件，反之为路由
   this.stack.push(layer) // 中间件是放在最顶部的
+}
+
+proto.param = function(key, handler) {
+  if (this.paramCallback[key]) { // 如果当前存在id所对应的数组，那么直接push
+    this.paramCallback[key].push(handler)
+  } else {
+    this.paramCallback[key] = [handler] // 否则创建
+  }
+}
+
+proto.processParam = function(layer, req, res, done) {
+  if (!layer.keys && layer.keys.length === 0) { // 如果keys不存在或者长度为0，则直接跳出
+    return done()
+  }
+  const params = layer.keys.map(item => item.name) // 取出当前参数对应的监听函数数组
+  const execCallbacks = (key, out) => {
+    let index = 0
+    const callbacks = this.paramCallback[key] // { id: [fn, fn], name: [fn] },取出id对应的[fn, fn]
+    function next() {
+      if (index === callbacks.length) return out()
+      callbacks[index++](req, res, next, req.params[key], key)
+    }
+    next()
+  }
+  let idx = 0
+  const process = () => {
+    if (idx === params.length) return done() // 如果全部执行完毕，那么让done去执行真正处理请求的函数
+    execCallbacks(params[idx++], process) // 依次处理每个param的监听函数
+  }
+  process()
 }
 
 methods.forEach(method => {
@@ -65,7 +96,9 @@ proto.handle = function(req, res, out) {
         if (layer.route) { // 如果route不为undefined，则表示当前layer是路由，否则为中间件
           if (layer.route.methods[req.method.toLowerCase()]) { // 判断方法是否匹配成功
             req.params = layer.params
-            layer.handle_request(req, res, dispatch)
+            this.processParam(layer, req, res, () => { // 在真正处理请求之前先走param监听函数
+              layer.handle_request(req, res, dispatch)
+            })
           }
         } else { // 中间件直接执行方法
           if (layer.handler.length !== 4) { // 跳过错误处理中间件
