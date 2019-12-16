@@ -1,5 +1,6 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 const resolve = (...args) => path.resolve(__dirname, ...args)
 
@@ -12,7 +13,8 @@ module.exports = {
     filename: 'bundle.js'
   },
   devServer: {
-    contentBase: resolve('dist')
+    contentBase: resolve('dist'),
+    hot: true
   },
   // 模块寻找目录
   resolve: {},
@@ -24,7 +26,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: resolve('./src/index.html'),
       filename: 'index.html'
-    })
+    }),
+    new CleanWebpackPlugin()
   ],
   module: {
     rules: [
@@ -56,6 +59,13 @@ module.exports = {
         ],
         include: resolve('./src'),
         exclude: /node_modules/
+      },
+      {
+        test: /\.less$/,
+        use: [
+          'style-loader', // 把css转换为style标签
+          'less-loader' // 把less转换为css
+        ]
       },
       {
         test: /\.(jp(e)g|png)$/,

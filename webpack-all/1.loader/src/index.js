@@ -1,5 +1,8 @@
+
 const title1 = require('./title1')
 const title2 = require('./title2')
+require('./index.less')
+
 
 console.log(title1, title2)
 
