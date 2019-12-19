@@ -68,6 +68,13 @@ module.exports = {
         ]
       },
       {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader'
+        ]
+      },
+      {
         test: /\.(jp(e)g|png)$/,
         use: [
           // {
