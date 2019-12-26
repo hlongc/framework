@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .file-container {
+      width: 200px;
+      text-align: center;
+      height: 150px;
+      line-height: 150px;
+      letter-spacing: 2px;
+      color: #333;
+      border: 1px solid #333;
+    }
+    .progress-bar {
+      position: relative;
+      width: 200px;
+      height: 30px;
+      border: 1px solid red;
+    }
+    .progress {
+      height: 30px;
+      width: 0;
+      background-color: deepskyblue;
+    }
+    .text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      height: 100%;
+      line-height: 30px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="file-container" id="drag">
+    文件拖拽上传
+  </div>
+  <div class="progress-bar">
+    <div class="progress" id="progress"></div>
+    <div class="text" id="text"></div>
+  </div>
+  <button id="upload">上传</button>
+  <script>
+    let file = ''
+    let loading = false
+    drag.addEventListener('dragover', function(e) {
+      e.preventDefault()
+    })
+    drag.addEventListener('drop', function(e) {
+      console.log(e)
+      e.preventDefault()
+      file = e.dataTransfer.files[0]
+    })
+    
+    upload.onclick = function() {
+      if (loading) return alert('文件正在上传中，请勿重复点击')
+      const fd = new FormData()
+      fd.append('avatar', file)
+
+      const xhr = new XMLHttpRequest()
+      xhr.open('post', 'upload', true)
+      xhr.onload = function() {
+        loading = false
+        drag.innerHTML = '上传成功'
+      }
+      xhr.upload.onprogress = function(e) {
+        loading = true
+        const ratio = (e.loaded / e.total) * 100
+        progress.style.width = ratio + '%'
+        text.innerHTML = ratio.toFixed(2) + '%'
+      }
+      xhr.send(fd)
+    }
+
+  </script>
+</body>
+</html>
