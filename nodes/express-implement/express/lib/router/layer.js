@@ -12,7 +12,6 @@ Layer.prototype.match = function(pathname) {
   if (match) { // 如果匹配成功 则保存当前params并且返回ture
     // 两个数组合并成对象 match:[xxx,1,2] + this.keys[{name:id},{name:name}]  => {id:1,name:2}
     this.params = this.keys.reduce((memo, cur, index) => (memo[cur.name] = match[index + 1],memo), {})
-    console.log(this.params)
     return true
   }
   if (this.path === pathname) return true

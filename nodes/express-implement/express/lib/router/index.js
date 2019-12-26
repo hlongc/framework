@@ -52,6 +52,7 @@ proto.processParam = function(layer, req, res, done) {
   const execCallbacks = (key, out) => {
     let index = 0
     const callbacks = this.paramCallback[key] // { id: [fn, fn], name: [fn] },取出id对应的[fn, fn]
+    if (!callbacks) return out()
     function next() {
       if (index === callbacks.length) return out()
       callbacks[index++](req, res, next, req.params[key], key)
