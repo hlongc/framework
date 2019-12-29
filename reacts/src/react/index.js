@@ -3,6 +3,14 @@ export const REACT_ELEMENT_TYPE = hasSymbol
     ? Symbol.for('react.element')
     : 0xeac7;
 
+export class Component {
+  constructor(props) {
+    this.props = props
+  }
+  static isReactComponent = true
+}
+ 
+    
 function createElement(type, config, children) {
   const props = {}
   for (const key in config) {
