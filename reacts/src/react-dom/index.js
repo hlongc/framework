@@ -10,10 +10,16 @@ function render(node, container) {
   if (type.isReactComponent) { // 说明是类组件,new 类，得到实例，调用实例的render方法，得到react元素
     const element = new type(props).render()
     type = element.type
+    if (typeof type === 'function') { // 如果返回的还是一个函数，那么递归渲染，直到找到react元素为止
+      return render(element, container)
+    }
     props = element.props
   } else if (typeof type === 'function') { // 如果是函数式组件，那么执行函数并传入props属性，得到返回的react元素
     const element = type(props)
     type = element.type
+    if (typeof type === 'function') { // 如果返回的还是一个函数，那么递归渲染，直到找到react元素为止
+      return render(element, container)
+    }
     props = element.props
   }
 
