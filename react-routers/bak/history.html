@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    window.onpopstate = function(e) {
+      console.log({ type: e.type, state: e.state, pathname: window.location.pathname })
+      root.innerHTML = e.state.letter
+    }
+    window.onpushstate = function(state, title, path) {
+      console.log(state, title, path)
+    }
+    !((history) => {
+      const oldPushState = history.pushState
+      history.pushState = (state, title, path) => {
+        oldPushState.call(history, state, title, path)
+        if (typeof window.onpushstate === 'function') {
+          window.onpushstate(state, title, path)
+        }
+      }
+    })(window.history)
+    setTimeout(() => {
+      // pushState没有监听事件，只能自己实现
+      window.history.pushState({ letter: 'a' }, 'page a', '/a')
+    }, 2000)
+    setTimeout(() => {
+      window.history.pushState({ letter: 'b' }, 'page b', '/b')
+    }, 3000)
+    setTimeout(() => {
+      window.history.pushState({ letter: 'c' }, 'page c', '/c')
+    }, 4000)
+    setTimeout(() => {
+      window.history.go(-1)
+    }, 5000)
+  </script>
+</body>
+</html>
