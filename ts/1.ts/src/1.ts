@@ -19,7 +19,7 @@ let demo:string|number = 'hlc'
 // console.log((<number>demo).toFixed(2)) // 另外一种类型转换方式
 
 type Self = string | number
-const name123:Self = 1234
+const name123:Self = 12345
 console.log(name123)
 
 // 类型申明

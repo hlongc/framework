@@ -17,7 +17,7 @@ function greet(name) {
 }
 greet('hlc');
 var demo = 'hlc';
-var name123 = 1234;
+var name123 = 12345;
 console.log(name123);
 var getUserName = function (firstname, lastname) {
     return firstname + lastname;
