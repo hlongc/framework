@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from '../react-router-dom'
 
 export default function Add(props) {
   const [users, setUsers] = useState([])
@@ -9,7 +10,9 @@ export default function Add(props) {
   return (
     <ol>
       {
-        users.map((item, index) => <li key={index}>{item}</li>)
+        users.map((user, index) => {
+          return <li key={index}><Link to={{ pathname: `/user/detail/${user.id}`, state: user }}>{user.name}</Link></li>
+        })
       }
     </ol>
   )

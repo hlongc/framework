@@ -4,7 +4,7 @@ export default function Add(props) {
   const ref = useRef()
   function handleSubmit() {
     const users = sessionStorage.getItem('users') ? JSON.parse(sessionStorage.getItem('users')) : []
-    users.push(ref.current.value)
+    users.push({ id: new Date().getTime() + '', name: ref.current.value })
     sessionStorage.setItem('users', JSON.stringify(users))
     props.history.push('/user/list')
   }

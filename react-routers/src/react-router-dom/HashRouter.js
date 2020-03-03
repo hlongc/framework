@@ -19,8 +19,9 @@ export default class HashRouter extends React.Component {
     this.setState({
       ...this.state,
       location: {
+        ...this.state.location,
         pathname: window.location.hash.slice(1) || '/',
-        state: window.history.state
+        state: this.locationState
       }
     })
   }
@@ -28,10 +29,17 @@ export default class HashRouter extends React.Component {
     window.removeEventListener('hashchange', this.handleHashChange)
   }
   render() {
+    const that = this
     const history = {
       location: this.state.location,
-      push(path) {
-        window.location.hash = path
+      push(to) { // 判断当前传入的是字符串还是对象
+        if (typeof to === 'object') {
+          const { pathname, state } = to
+          that.locationState = state
+          window.location.hash = pathname
+        } else {
+          window.location.hash = to
+        }
       }
     }
     const value = {
