@@ -28,8 +28,18 @@ export default class HashRouter extends React.Component {
     window.removeEventListener('hashchange', this.handleHashChange)
   }
   render() {
+    const history = {
+      location: this.state.location,
+      push(path) {
+        window.location.hash = path
+      }
+    }
+    const value = {
+      location: this.state.location,
+      history
+    }
     return (
-      <RouterContext.Provider value={this.state}>
+      <RouterContext.Provider value={value}>
         { this.props.children }
       </RouterContext.Provider>
     )
