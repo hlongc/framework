@@ -6,7 +6,7 @@ export default function(props) {
   return (
     <RouterContext.Consumer>
       {
-        value => <a href={`#${to}`} onClick={() => value.history.push(props.to)}>{props.children}</a>
+        value => <a {...props} href={`#${to}`} onClick={() => value.history.push(props.to)}>{props.children}</a>
       }
     </RouterContext.Consumer>
   )
