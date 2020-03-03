@@ -2,10 +2,15 @@ import React, { useContext } from 'react'
 import pathToRegexp from 'path-to-regexp'
 import RouterContext from './RouterContext'
 
+/**
+ * Route渲染的三种方式
+ * 1、component
+ * 2、render
+ */
 
 export default function Route(props) {
   const context = useContext(RouterContext)
-  const { path = '/', component: Component, exact = false } = props
+  const { path = '/', component: Component, exact = false, render } = props
   const pathname = context.location.pathname
   let paramsName = []
   // exact 表示是否精准匹配
@@ -30,7 +35,13 @@ export default function Route(props) {
         isExact: path === url
       }
     }
-    return <Component {...routeProps} />
+    if (Component) {
+      return <Component {...routeProps} />
+    } else if (render) {
+      return render(routeProps)
+    } else {
+      return null
+    }
   }
   return null
 }
