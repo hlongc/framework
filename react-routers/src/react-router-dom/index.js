@@ -4,6 +4,7 @@ import Link from './Link'
 import NavLink from './NavLink'
 import Switch from './Switch'
 import Redirect from './Redirect'
+import withRouter from './withRouter.js'
 
 export {
   HashRouter,
@@ -11,5 +12,6 @@ export {
   Route,
   Switch,
   Redirect,
-  NavLink
+  NavLink,
+  withRouter
 }

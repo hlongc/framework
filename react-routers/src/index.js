@@ -6,13 +6,15 @@ import User from './components/User'
 import Profile from './components/Profile'
 import Private from './components/Private'
 import Login from './components/Login'
+import GoHome from './components/GoHome'
 
 ReactDOM.render(
   <Router>
-    <NavLink to="/">Home</NavLink>
+    <GoHome />
+    <NavLink exact={true} to="/">Home</NavLink>
     <NavLink to="/user">User</NavLink>
     <NavLink to="/profile">Profile</NavLink>
-    <p>{sessionStorage.getItem('login')}</p>
+    <span>{sessionStorage.getItem('login')}</span>
     <Switch>
       <Route exact={true} path="/" component={Home} />
       <Route path="/login" component={Login} />
