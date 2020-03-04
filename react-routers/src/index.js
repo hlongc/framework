@@ -10,7 +10,7 @@ import GoHome from './components/GoHome'
 
 ReactDOM.render(
   <Router>
-    <GoHome />
+    <GoHome>回家啦</GoHome>
     <NavLink exact={true} to="/">Home</NavLink>
     <NavLink to="/user">User</NavLink>
     <NavLink to="/profile">Profile</NavLink>

@@ -4,14 +4,16 @@ import Link from './Link'
 import NavLink from './NavLink'
 import Switch from './Switch'
 import Redirect from './Redirect'
-import withRouter from './withRouter.js'
+import withRouter from './withRouter'
+import Prompt from './Prompt'
 
 export {
   HashRouter,
-  Link,
   Route,
+  Link,
+  NavLink,
   Switch,
   Redirect,
-  NavLink,
-  withRouter
+  withRouter,
+  Prompt
 }

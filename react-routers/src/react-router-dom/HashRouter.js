@@ -30,9 +30,14 @@ export default class HashRouter extends React.Component {
   }
   render() {
     const that = this
+    const location = this.state.location
     const history = {
-      location: this.state.location,
+      location,
       push(to) { // 判断当前传入的是字符串还是对象
+        if (history.blocking) {
+          const yes = window.confirm(history.blocking(location)) // 弹出确认框提示是否要进行跳转
+          if (!yes) return
+        }
         if (typeof to === 'object') {
           const { pathname, state } = to
           that.locationState = state
@@ -40,12 +45,15 @@ export default class HashRouter extends React.Component {
         } else {
           window.location.hash = to
         }
+      },
+      block(message) {
+        history.blocking = message
+      },
+      unblock() {
+        history.blocking = null
       }
     }
-    const value = {
-      location: this.state.location,
-      history
-    }
+    const value = { location, history }
     return (
       <RouterContext.Provider value={value}>
         { this.props.children }
