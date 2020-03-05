@@ -23,6 +23,7 @@ export default function Route(props) {
     history: context.history,
     location: context.location
   }
+  
   const matched = pathname.match(reg)
   // 匹配成功才会有match这个属性
   if (matched) {
