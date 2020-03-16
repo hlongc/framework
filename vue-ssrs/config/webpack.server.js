@@ -1,6 +1,8 @@
 const merge = require('webpack-merge')
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ServerSSRPlugin = require('vue-server-renderer/server-plugin')
+const externals = require('webpack-node-externals')
 const base = require('./webpack.base')
 
 module.exports = merge(base, {
@@ -11,7 +13,9 @@ module.exports = merge(base, {
   output: {
     libraryTarget: 'commonjs2' // 打包出来的结果是module.exports，供服务端用
   },
+  externals: [externals()], // 按照node来打包，不需要把外部依赖打包进去，因为node可以直接require进来第三方包
   plugins: [
+    new ServerSSRPlugin(), // 服务器打包启用这个产生json文件,在重新打包以后，服务不用重启
     // 把public/index.ssr.html拷贝到dist目录下，
     new HtmlWebpackPlugin({ 
       filename: 'index.ssr.html',
