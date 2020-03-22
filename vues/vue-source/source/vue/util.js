@@ -15,7 +15,9 @@ const util = {
     node.templateStr = node.templateStr || node.textContent // 记住第一次模板，在后面解析使用
     node.textContent = node.templateStr.replace(defaultReg, function() {
       // 对捕获的进行空格删除
-      return util.getValue(vm, arguments[1].trim())
+      const res = util.getValue(vm, arguments[1].trim())
+      // 如果是对象或者数组，就序列化输出
+      return typeof res === 'object' ? JSON.stringify(res) : res
     })
   }
 }

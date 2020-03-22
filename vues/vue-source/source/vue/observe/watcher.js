@@ -59,22 +59,22 @@ function queueWachter(wacther) {
 }
 
 export function nextTick(cb) {
-  // 微任务优先级最高
+  // 微任务优先级最高 优先级由高到低
   if (Promise) {
     Promise.resolve().then(cb)
   } else if (setImmediate) {
     setImmediate(cb)
+  } else if (MutationObserver) {
+    const observe = new MutationObserver(cb)
+    const node = document.createElement('div')
+    observe.observe(node, { subtree: true, childList: true })
+    node.appendChild(document.createElement('p'))
   } else if (MessageChannel) {
     const channel = new MessageChannel()
     const port1 = channel.port1
     const port2 = channel.port2
     port1.onmessage = cb
     port2.postMessage(1)
-  } else if (MutationObserver) {
-    const observe = new MutationObserver(cb)
-    const node = document.createElement('div')
-    observe.observe(node, { subtree: true, childList: true })
-    node.appendChild(document.createElement('p'))
   } else {
     setTimeout(() => {
       cb()

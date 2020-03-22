@@ -6,7 +6,7 @@ const vm = new Vue({
     return {
       msg: 'hello',
       info: { age: 25, name: 'hlc' },
-      hobby: [{ a: 1 }, '足球', '篮球', '羽毛球']
+      hobby: [[1, []], '足球', '篮球', '羽毛球']
     }
   },
   watch: {
@@ -23,4 +23,6 @@ setTimeout(() => {
   vm.info.name = 'hlongc2'
   vm.info.age = 24
   vm.msg = 'world'
+  vm.hobby[0].push(2)
+  vm.hobby[0][1].push(3)
 }, 3000)

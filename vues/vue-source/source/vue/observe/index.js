@@ -18,6 +18,7 @@ export function observe(data) {
   if (typeof data !== 'object' || data === null) {
     return
   }
+  if (data.__ob__) return data.__data__ // 如果已经观测过了，则直接返回
   return new Observer(data)
 }
 

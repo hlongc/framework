@@ -3,7 +3,7 @@ import { arrayMethods, observeArray } from './array'
 import Dep from './dep'
 
 export function defineReactive(obj, key, value) { // 定义响应式数据
-  observe(value) // 继续观测value,因为value有可能还是一个对象
+  const childObserve = observe(value) // 继续观测value,因为value有可能还是一个对象
   // 同一个属性是同一个dep
   const dep = new Dep()
   // Object.defineProperty这个方法不兼容ie9以下，所以vue不兼容ie9以下
@@ -11,7 +11,10 @@ export function defineReactive(obj, key, value) { // 定义响应式数据
     get() {
       // 因为第一次页面渲染的时候new Watcher了，调用的getter()方法时pushWachter了，所以是一定存在target的
       if (Dep.target) {
-        dep.depend()
+        dep.depend() // 这一步让dep和wacther互相保存
+        if (childObserve) {
+          childObserve.dep.depend() // 收集数组变化
+        }
       }
       return value
     },
@@ -26,6 +29,11 @@ export function defineReactive(obj, key, value) { // 定义响应式数据
 
 class Observer{
   constructor(data) {
+    this.dep = new Dep()
+    // 这个__ob__属性是为了收集数组依赖变化而设定的
+    Object.defineProperty(data, '__ob__', {
+      get: () => this
+    })
     if (Array.isArray(data)) {
       // 数组进行单独拦截,修改原型链
       data.__proto__ = arrayMethods

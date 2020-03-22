@@ -30,6 +30,7 @@ methods.forEach(method => {
         break
     }
     if (increment) observeArray(increment) // 对数组新增的值也进行观测，因为新增的有可能是对象
+    this.__ob__.dep.notify() // 通知数组发生了变化，更新视图
     return oldArrayPrototyeMethods[method].apply(this, args)
   }
 })
