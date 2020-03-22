@@ -52,8 +52,8 @@ Vue.prototype._update = function() {
   // 依赖变化了需要重新渲染
 }
 
-Vue.prototype.$watch = function(expr, fn) {
-  new Watcher(this, expr, fn, { user: true })
+Vue.prototype.$watch = function(expr, fn, options) {
+  new Watcher(this, expr, fn, { user: true, ...options })
 }
 
 export default Vue

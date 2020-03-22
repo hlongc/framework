@@ -5,17 +5,25 @@ const vm = new Vue({
   data() {
     return {
       msg: 'hello',
+      firstName: 'longchao',
+      lastName: 'hu',
       info: { age: 25, name: 'hlc' },
       hobby: [[1, []], '足球', '篮球', '羽毛球']
     }
   },
   watch: {
-    msg(newVal, oldVal) {
-      console.log('msg', newVal, oldVal)
+    msg: {
+      handler(newVal, oldVal) {
+        console.log(newVal, oldVal)
+      },
+      immediate: true
     }
   },
   computed: {
-
+    fullName() {
+      console.log('fullName')
+      return this.firstName + this.lastName
+    }
   }
 })
 
@@ -29,5 +37,6 @@ setTimeout(() => {
   vm.hobby[0][1].push(3)
   setTimeout(() => {
     vm.msg = 'hello'
+    vm.firstName = 'lc'
   }, 2000)
 }, 3000)

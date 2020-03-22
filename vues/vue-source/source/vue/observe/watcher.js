@@ -23,20 +23,41 @@ class Watcher{
       }
     }
     this.user = options.user // 是否为用户自定义的wacth
+    this.immediate = options.immediate // 是否立即执行回调
+    this.lazy = options.lazy // lazy表示当前是计算属性watcher
+    this.dirty = this.lazy
     this.cb = cb
     this.options = options
     this.id = ++id
 
-    this.oldValue = this.get() // 记录老值
+    this.oldValue = !this.lazy && this.get() // 记录老值
+    if (this.immediate) {
+      this.cb(this.oldValue)
+    }
   }
   get() {
     pushWatcher(this) // 第一次是渲染watcher
-    const value = this.getter()
+    const value = this.getter.call(this.vm)
     popWatcher() // 为了下次使用，要删除
     return value
   }
   update() { // 调用get方法调用getter来重新渲染页面
+    if (this.lazy) { // 如果是计算属性，那么需要再次求值
+      this.dirty = true
+    }
     queueWachter(this)
+  }
+  depend() {
+    let len = this.deps.length
+    while(len--) {
+      this.deps[len].depend()
+    }
+  }
+  // 计算属性求值
+  evluate() {
+    console.log('evluate')
+    this.oldValue = this.get() // 调用计算属性的计算函数,并绑定this指向
+    this.dirty = false // false表示当前已经求过值了
   }
   run() {
     // 更新的时候比较老值和新值是否相同
