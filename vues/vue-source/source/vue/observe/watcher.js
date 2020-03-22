@@ -14,23 +14,38 @@ class Watcher{
     this.exprOrFn = exprOrFn
     this.deps = [] // 依赖当前wacther的dep
     this.depId = new Set() // 记录依赖当前wacther的dep的ID
-    if (typeof exprOrFn === 'function') this.getter = exprOrFn
+    if (typeof exprOrFn === 'function') {
+      this.getter = exprOrFn
+    } else {
+      // 如果是表达式，则去取值，从而主动触发收集
+      this.getter = function() {
+        return vm[exprOrFn]
+      }
+    }
+    this.user = options.user // 是否为用户自定义的wacth
     this.cb = cb
     this.options = options
     this.id = ++id
 
-    this.get()
+    this.oldValue = this.get() // 记录老值
   }
   get() {
     pushWatcher(this) // 第一次是渲染watcher
-    this.getter()
+    const value = this.getter()
     popWatcher() // 为了下次使用，要删除
+    return value
   }
   update() { // 调用get方法调用getter来重新渲染页面
     queueWachter(this)
   }
   run() {
-    this.get()
+    // 更新的时候比较老值和新值是否相同
+    const newValue = this.get()
+    if (newValue !== this.oldValue) {
+      this.cb(newValue, this.oldValue) // 触发用户自定义的watch方法，并传入新值和老值
+      // 更新老值
+      this.oldValue = newValue
+    }
   }
   addDep(dep) {
     if (!this.depId.has(dep.id)) { // 因为dep的id是不重复的

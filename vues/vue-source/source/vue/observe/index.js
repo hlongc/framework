@@ -47,6 +47,13 @@ function initComputed() {
 
 }
 
-function initWatch() {
+function createWachter(vm, key, fn) {
+  return vm.$watch(key, fn)
+}
 
+function initWatch(vm) {
+  const watches = vm.$options.watch
+  for (const key in watches) {
+    createWachter(vm, key, watches[key])
+  }
 }

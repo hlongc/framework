@@ -10,7 +10,9 @@ const vm = new Vue({
     }
   },
   watch: {
-
+    msg(newVal, oldVal) {
+      console.log('msg', newVal, oldVal)
+    }
   },
   computed: {
 
@@ -25,4 +27,7 @@ setTimeout(() => {
   vm.msg = 'world'
   vm.hobby[0].push(2)
   vm.hobby[0][1].push(3)
+  setTimeout(() => {
+    vm.msg = 'hello'
+  }, 2000)
 }, 3000)
