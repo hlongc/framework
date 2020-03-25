@@ -1,5 +1,6 @@
 <template>
   <div class="hello">
+    <router-link to="/example">to example</router-link>
     <h1>{{ msg }}</h1>
     <Calender v-model="now" />
     <p>工资：{{ $store.state.salary }}</p>

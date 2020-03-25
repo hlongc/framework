@@ -6,10 +6,13 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import router from './router'
 import store from './store'
+import LazyLoad from './components/LazyLoad'
+import loading from '@/assets/logo.png'
 import './utils/app'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
+Vue.use(LazyLoad, { loading })
 
 /* eslint-disable no-new */
 new Vue({
