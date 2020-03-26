@@ -3,13 +3,16 @@
     <router-link to="/example">to example</router-link>
     <h1>{{ msg }}</h1>
     <Calender v-model="now" />
-    <p>工资：{{ $store.state.salary }}</p>
-    <p>上税：{{ $store.getters.tax }}</p>
-    <p>{{ $store.state.a.x }}</p>
-    <p>{{ $store.state.a.c.z }}</p>
+    <p>工资：{{ salary }}</p>
+    <p>上税：{{ tax }}</p>
+    <p>{{ x }}</p>
+    <p>{{ z }}</p>
     <button @click="add1">马上涨工资</button>
     <hr/>
     <button @click="add2">等一下涨工资</button>
+    <p>新注册的模块</p>
+    <p>{{ name }}</p>
+    <button @click="updateName">修改名字</button>
     <Test />
   </div>
 </template>
@@ -17,9 +20,17 @@
 <script>
 import Calender from './Calender.vue'
 import Test from './Test.js'
+
+import { mapState, mapGetters, mapMutations, mapActions } from '../vuex.js'
+
 export default {
   name: 'HelloWorld',
   components: { Calender, Test },
+  // 可进行重命名
+  computed: {
+    ...mapState({ salary: 'salary', x: 'a.x', z: 'a.c.z', name: 'f.name' }),
+    ...mapGetters(['tax'])
+  },
   data () {
     return {
       now: new Date('2019/07/08'),
@@ -27,11 +38,18 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({ increase: 'increase', acIncrease: 'a/c/increase', aclIncrease: 'a/c/l/increase', editName: 'editName' }),
+    ...mapActions(['delayIncrease']),
     add1 () {
-      this.$store.commit('increase', 3000)
+      this.increase(3000)
+      this.acIncrease()
+      this.aclIncrease()
     },
     add2 () {
-      this.$store.dispatch('delayIncrease', 3500)
+      this.delayIncrease(3500)
+    },
+    updateName() {
+      this.editName()
     }
   }
 }
