@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Router from 'vue-router'
+import Router from '@/vue-router'
 import Home from '@/components/HelloWorld'
 import NotFound from '@/components/404'
 import Example from '@/components/Example'
