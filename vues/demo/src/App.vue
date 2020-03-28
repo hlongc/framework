@@ -5,7 +5,8 @@
         <MyMenu :data="data" />
       </el-aside>
       <el-main>
-        <router-view/>
+        {{ _routerRoot._route.path }}
+        <router-view />
       </el-main>
     </el-container>
   </div>
@@ -36,9 +37,6 @@ export default {
         ]}
       ]
     }
-  },
-  mounted () {
-    console.log(router)
   }
 }
 </script>

@@ -200,14 +200,14 @@ export function mapMutations(mutations) {
   const obj = {}
   if (Array.isArray(mutations)) {
     mutations.forEach(mutationName => {
-    obj[mutationName] = function(payload) {
-      this.$store.commit(mutationName, payload)
+    obj[mutationName] = function(...payload) {
+      this.$store.commit(mutationName, ...payload)
     }
   })
   } else if (mutations.toString().slice(-7, -1) === 'Object') {
     Object.entries(mutations).forEach(([rename, realName]) => {
-      obj[rename] = function(payload) {
-        this.$store.commit(realName, payload)
+      obj[rename] = function(...payload) {
+        this.$store.commit(realName, ...payload)
       }
     })
   }

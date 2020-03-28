@@ -37,9 +37,6 @@ export default {
       msg: 'Welcome to Your Vue.js App12'
     }
   },
-  mounted() {
-    console.log(this)
-  },
   methods: {
     ...mapMutations({ increase: 'increase', acIncrease: 'a/c/increase', aclIncrease: 'a/c/l/increase', editName: 'editName' }),
     ...mapActions(['delayIncrease']),

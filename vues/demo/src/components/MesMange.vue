@@ -1,5 +1,5 @@
 <template>
-  <div>MesMange</div>
+  <div>短信管理</div>
 </template>
 
 <script>
