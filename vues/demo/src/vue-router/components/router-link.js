@@ -19,9 +19,6 @@ export default {
   },
   render(h) {
     const tag = 'a' || this.tag
-    return <div>
-      <tag>1</tag>
-      <a href="" onClick={$event => this.go($event)}>{this.$slots.default}</a>
-    </div>
+    return <a href="" onClick={$event => this.go($event)}>{this.$slots.default}</a>
   }
 }

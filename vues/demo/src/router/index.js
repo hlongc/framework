@@ -47,6 +47,19 @@ routes.push({
   meta: { title: '综合实例' }
 })
 
-export default new Router({
+
+const router = new Router({
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  console.log('第一个beforeEach')
+  next()
+})
+
+router.beforeEach((to, from, next) => {
+  console.log('第er个beforeEach')
+  next()
+})
+
+export default router

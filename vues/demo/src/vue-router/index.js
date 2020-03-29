@@ -8,6 +8,8 @@ class VueRouter {
     this.macther = createMatcher(options.routes || [])
     // 初始化路由系统
     this.history = new HashHistory(this)
+    // beforeEach回调
+    this.beforeEachList = []
   }
 
   match(path) {
@@ -29,6 +31,10 @@ class VueRouter {
     history.listen(route => {
       app._route = route
     })
+  }
+
+  beforeEach(cb) {
+    this.beforeEachList.push(cb)
   }
 
   push(path) {

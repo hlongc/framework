@@ -8,6 +8,15 @@ export function createRoute(record, location = {}) {
   }
   return { ...location, matched: res }
 }
+// 进行迭代，执行完每个钩子函数
+function runQueue(queue, iterator, callback) {
+  function next(index) {
+    if (index === queue.length) return callback()
+    const beforeEach = queue[index]
+    iterator(beforeEach, () => next(++index))
+  }
+  next(0)
+}
 
 export default class History {
   constructor(router) {
@@ -18,10 +27,24 @@ export default class History {
   transitionTo(path, callback) {
     const r = this.router.match(path)
     // 路由不改变就不跳转
-    if (path === this.current.path && r.matched.length === this.current.matched.length) return
+    if (path === this.current.path && r.matched.length === this.current.matched.length) {
+      return
+    }
+    callback && callback()
+    const queue = this.router.beforeEachList
+    const iterator = (beforeEach, next) => {
+      // 给beforeEach传入三个参数 from, to, next
+      beforeEach(this.current, r, next)
+    }
+    // 更新路由之前先执行beforeEach钩子函数
+    runQueue(queue, iterator, () => {
+      this.updateRoute(r)
+    })
+  }
+  // 更新路由
+  updateRoute(r) {
     this.current = r
     this.cb && this.cb(r) // 路由变化时去更新_route刷新视图
-    callback && callback()
   }
   listen(cb) {
     this.cb = cb
