@@ -1,10 +1,11 @@
 <template>
-  <button class="hlc-button" :class="btnClass">
-    <hlc-icon :type="prefixIcon" />
+  <!-- 绑定点击事件 -->
+  <button class="hlc-button" :class="btnClass" @click="$emit('click', $event)">
+    <hlc-icon v-if="prefixIcon" :type="prefixIcon" />
     <span v-if="$slots.default">
       <slot></slot>
     </span>
-    <hlc-icon :type="suffixIcon" />
+    <hlc-icon v-if="suffixIcon" :type="suffixIcon" />
   </button>
 </template>
 <script>
@@ -43,7 +44,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import '../styles/common.scss';
+@import '@/package/styles/common.scss';
 $height: 42px;
 $font-size: 16px;
 $color: #606266;
@@ -67,8 +68,9 @@ $active-color: #3a8ee6;
   vertical-align: middle;
   outline: none;
   user-select: none;
+  min-width: 100px;
   &:hover {
-    border-color: $border-color;
+    border: 1px solid $border-color;
     background-color: $background;
   }
   &:focus, &:active {
