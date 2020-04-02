@@ -12,6 +12,7 @@ import Main from './components/container/main.vue'
 
 import Input from './components/input.vue'
 import Upload from './components/upload/upload.vue'
+import Progress from './components/progress.vue'
 
 export default {
   install(Vue) {
@@ -27,5 +28,6 @@ export default {
     Vue.component(Main.name, Main)
     Vue.component(Input.name, Input)
     Vue.component(Upload.name, Upload)
+    Vue.component(Progress.name, Progress)
   }
 }

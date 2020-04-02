@@ -1,30 +1,25 @@
-const Koa = require('koa')
-const Router = require('@koa/router')
-const multer = require('@koa/multer')
-const cors = require('koa2-cors')
+const express = require('express')
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
+ 
+const app = express()
 
-const app = new Koa()
-app.use(cors())
-const router = new Router()
-const upload = multer({ dest: 'uploads/' }) // note you can pass `multer` options here
+app.all('*', function(req, res, next) {
+  //设为指定的域支持跨域
+  res.header('Access-Control-Allow-Origin', "*")
+  res.header("Access-Control-Allow-Headers", "X-Requested-With")
+  res.header('Access-Control-Allow-Headers', 'Content-Type')
+  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS")
+  res.header('Access-Control-Allow-Credentials', true)
+  res.header("X-Powered-By", ' 3.2.1')
+  next()
+})
+ 
+app.post('/upload', upload.single('avator'), function (req, res) {
+  const { originalname, size, destination, filename, path } = req.file
+  res.send({ success: true, data: { originalname, size, destination, filename, path } })
+})
 
-// add a route for uploading multiple files
-router.post('/upload', upload.fields([{ name: 'avatar', maxCount: 5 }]), ctx => {
-    console.log('ctx.request.files', ctx.request.files)
-    console.log('ctx.files', ctx.files)
-    console.log('ctx.request.body', ctx.request.body)
-    console.log(ctx.request.files)
-    const r = ctx.request.files.avatar.map(item => ({
-      url: item.path,
-      name: item.originalname
-    }))
-    ctx.body = r
-  }
-)
-
-// add the router to our app
-app.use(router.routes())
-app.use(router.allowedMethods())
-
-// start the server
-app.listen(3000)
+app.listen(3000, () => {
+  console.log('express run on 3000 port')
+})

@@ -1,10 +1,8 @@
 <template>
-  <svg class="hlc-icon" aria-hidden="true">
-    <use :xlink:href="`#icon-${type}`"></use>
-  </svg>
+  <i :class="`hlc-icon iconfont icon-${type}`"></i>
 </template>
 <script>
-import '../styles/icon.js'
+import '../assets/iconfont.css'
 
 export default {
   name: 'hlc-icon',
@@ -18,8 +16,6 @@ export default {
 </script>
 <style lang="scss">
 .hlc-icon{
-  width: 25px;
-  height:25px;
   vertical-align: middle;
 }
 </style>

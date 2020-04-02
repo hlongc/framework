@@ -104,10 +104,6 @@ $active-color: #3a8ee6;
       color: #fff;
     }
   }
-  .hlc-icon {
-    width: 16px;
-    height: 16px;
-  }
   span + svg, svg + span {
     margin-left: 5px;
   }

@@ -1,23 +1,25 @@
 <template>
   <div id="app">
 
-    <hlc-upload
-      name="avator"
-      :file-list="fileList"
-      action="http://localhost:3000/upload"
-      accept="image/png,image/jpg"
-      :limit="3"
-      mutiple
-      :on-exceed="handleExceed"
-      :on-change="handleChange"
-      :on-error="handleError"
-      :on-success="handleSuccess"
-      :on-progress="handleProgress"
-      :beforeUpload="beforeUpload"
-    >
-      <hlc-button type="primary" prefix-icon="shangchuan">文件上传</hlc-button>
-      <p slot="tip">仅限.jpg,.jpeg,.png格式,最多五张,且每张大小不超过500kb</p>
-    </hlc-upload>
+    <div class="upload-container">
+      <hlc-upload
+        name="avator"
+        :file-list="fileList"
+        action="http://localhost:3000/upload"
+        accept="image/png,image/jpg"
+        :limit="3"
+        mutiple
+        :on-exceed="handleExceed"
+        :on-change="handleChange"
+        :on-error="handleError"
+        :on-success="handleSuccess"
+        :on-progress="handleProgress"
+        :beforeUpload="beforeUpload"
+      >
+        <hlc-button type="primary" prefix-icon="shangchuan">文件上传</hlc-button>
+        <p slot="tip">仅限.jpg,.jpeg,.png格式,最多五张,且每张大小不超过500kb</p>
+      </hlc-upload>
+    </div>
     <!-- <hlc-container>
       <hlc-header height="240px">
         <p>
@@ -168,10 +170,7 @@ export default {
     return {
       username: "",
       password: "",
-      fileList: [
-        { url: 'ccc', name: 'a.jpg' },
-        { url: 'xxx', name: 'b.jpg' }
-      ]
+      fileList: []
     };
   },
   methods: {
@@ -214,6 +213,9 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+.upload-container {
+  width: 500px;
 }
 .empty {
   height: 20px;

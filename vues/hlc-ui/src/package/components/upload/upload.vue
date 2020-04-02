@@ -5,7 +5,19 @@
     </div>
     <input class="hlc-upload-realInput" ref="realInput" type="file" :name="name" :multiple="mutiple" :accept="accept" @change="handleChange">
     <slot name="tip"></slot>
-    {{ files.length }}
+    <ul class="hlc-upload-filelist">
+      <li v-for="file in files" :key="file.uid" class="file-item">
+        <hlc-icon type="lajixiang"></hlc-icon>
+        {{ file.name }}
+        <span class="right-icon">
+          <hlc-icon class="zhengque" type="zhengque-"></hlc-icon>
+          <hlc-icon class="close" title="删除" @click.native="removeFile(file)" type="close"></hlc-icon>
+        </span>
+        <div class="progress-container">
+          <hlc-progress :strokeWith="3" :percent="file.percent" />
+        </div>
+      </li>
+    </ul>
   </div>
 </template>
 <script>
@@ -62,6 +74,7 @@ export default {
       type: Function,
       default: ajax
     },
+    beforeRemove: Function,
     beforeUpload: Function
   },
   data() {
@@ -105,18 +118,19 @@ export default {
     },
     postFile(file) {
       const uid = file.uid
+      const self = this
       const options = {
         file,
         name: this.name,
         action: this.action,
-        onError(e) {
-
+        onError: e => {
+          this.handleError(e, file)
         },
-        onProgress(e) {
-
+        onProgress: e => {
+          this.handleProgress(e, file)
         },
-        onSuccess(e) {
-
+        onSuccess: e => {
+          this.handleSuccess(e, file)
         }
       }
       const req = this.httpRequest(options)
@@ -125,13 +139,34 @@ export default {
         req.then(options.onSuccess, options.onError)
       }
     },
+    getFile(file) {
+      return this.files.find(f => f.uid === file.uid)
+    },
+    handleError(e, rowFile) {
+      const curFile = this.getFile(rowFile)
+      curFile.status = 'fail'
+      this.onChange(rowFile)
+      this.onError(e)
+    },
+    handleSuccess(e, rowFile) {
+      const curFile = this.getFile(rowFile)
+      curFile.status = 'success'
+      this.onChange(rowFile)
+      this.onSuccess(e, rowFile)
+    },
+    handleProgress(e, rowFile) {
+      // 找到构造的文件信息
+      const curFile = this.getFile(rowFile)
+      curFile.status = 'uploading'
+      curFile.percentage = e.percent || 0
+      this.onProgress(e)
+    },
     upload(file) {
       // 文件上传之前先看用户有没有beforeUpload函数，有并且返回true那就继续上传，false就不上传
       if (this.beforeUpload && !this.beforeUpload(file)) {
         this.files = this.files.filter(cur => cur.uid !== file.uid)
         return
       }
-      console.log('继续上传')
       this.postFile(file)
     },
     uploadFile(files) {
@@ -146,6 +181,12 @@ export default {
     handleChange(e) {
       const files = e.target.files
       this.uploadFile(files)
+    },
+    // 删除文件
+    removeFile(file) {
+      // 如果用户传入了beforeRemove，并且返回值为false，那么不删除
+      if (this.beforeRemove && !this.beforeRemove(file)) return
+      this.files = this.files.filter(f => f.uid !== file.uid)
     }
   }
 }
@@ -157,6 +198,48 @@ export default {
   }
   .hlc-upload-realInput {
     display: none;
+  }
+  .hlc-upload-filelist {
+    .file-item {
+      list-style: none;
+      transition: all .5s cubic-bezier(.55, 0, .1, 1);
+      font-size: 14px;
+      color: #606266;
+      line-height: 1.8;
+      margin-top: 5px;
+      position: relative;
+      box-sizing: border-box;
+      border-radius: 4px;
+      width: 100%;
+      &:hover {
+        background-color: #f5f7fa;
+      }
+      .right-icon {
+        position: absolute;
+        right: 8px;
+        top: 0;
+        width: 16px;
+        cursor: pointer;
+        &:hover .close {
+          display: inline-block;
+        }
+        &:hover .zhengque {
+          display: none;
+        }
+        .zhengque {
+          color: #67c23a;
+        }
+        .close {
+          display: none;
+        }
+      }
+      .progress-container {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        bottom: 0;
+      }
+    }
   }
 }
 </style>
