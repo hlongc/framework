@@ -1,20 +1,25 @@
 <template>
   <div class="hlc-upload">
-    <div @click="callWindow" class="hlc-upload-btn">
-      <slot></slot>
-    </div>
-    <input class="hlc-upload-realInput" ref="realInput" type="file" :name="name" :multiple="mutiple" :accept="accept" @change="handleChange">
+    <template v-if="drag">
+      <drag :accept="accept" @uploadFile="uploadFile" />
+    </template>
+    <template v-else>
+      <div @click="callWindow" class="hlc-upload-btn">
+        <slot></slot>
+      </div>
+      <input class="hlc-upload-realInput" ref="realInput" type="file" :name="name" :multiple="mutiple" :accept="accept" @change="handleChange">
+    </template>
     <slot name="tip"></slot>
     <ul class="hlc-upload-filelist">
       <li v-for="file in files" :key="file.uid" class="file-item">
         <hlc-icon type="lajixiang"></hlc-icon>
         {{ file.name }}
-        <span class="right-icon">
+        <span v-if="file.status === 'success'" class="right-icon">
           <hlc-icon class="zhengque" type="zhengque-"></hlc-icon>
           <hlc-icon class="close" title="删除" @click.native="removeFile(file)" type="close"></hlc-icon>
         </span>
-        <div class="progress-container">
-          <hlc-progress :strokeWith="3" :percent="file.percent" />
+        <div v-else class="progress-container">
+          <hlc-progress :strokeWith="3" :percent="file.percentage" />
         </div>
       </li>
     </ul>
@@ -22,9 +27,11 @@
 </template>
 <script>
 import ajax from './ajax'
+import drag from './dragUpload.vue'
 
 export default {
   name: 'hlc-upload',
+  components: { drag },
   props: {
     name: {
       type: String,
@@ -33,6 +40,10 @@ export default {
     accept: {
       type: '',
       default: '*'
+    },
+    drag: {
+      type: Boolean,
+      default: false
     },
     fileList: {
       type: Array,
@@ -216,7 +227,7 @@ export default {
       }
       .right-icon {
         position: absolute;
-        right: 8px;
+        right: 0;
         top: 0;
         width: 16px;
         cursor: pointer;

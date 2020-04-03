@@ -9,6 +9,7 @@
         accept="image/png,image/jpg"
         :limit="3"
         mutiple
+        drag
         :on-exceed="handleExceed"
         :on-change="handleChange"
         :on-error="handleError"
@@ -216,6 +217,7 @@ export default {
 }
 .upload-container {
   width: 500px;
+  margin-left: 20px;
 }
 .empty {
   height: 20px;
