@@ -11,7 +11,10 @@
       :name="name"
       :placeholder="placeholder"
       :disabled="disabled"
-      @input="$emit('input', $event.target.value)"
+      @input="$emit('input', $event)"
+      @focus="$emit('focus', $event)"
+      @blur="$emit('blur', $event)"
+      @change="$emit('change', $event)"
     />
     <hlc-icon
       v-if="suffixIcon"

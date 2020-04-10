@@ -1,5 +1,5 @@
 <template>
-  <i :class="`hlc-icon iconfont icon-${type}`"></i>
+  <i :class="`hlc-icon iconfont icon-${type}`" @click="$emit('click', $event)"></i>
 </template>
 <script>
 import '../assets/iconfont.css'
