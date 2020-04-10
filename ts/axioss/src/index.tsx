@@ -16,6 +16,10 @@ interface Human {
 
 const user: User = { name: 'hlc', password: 'xixi', age: 1 }
 console.time('request')
+
+const cancelToken = axios.CancelToken
+const source = cancelToken.source()
+
 axios.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
   config.headers.name += 1
   console.log('第request一个拦截器')
@@ -34,8 +38,8 @@ axios.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig 
     setTimeout(() => {
       config.headers.name += 3
       console.log('第request三个拦截器')
-      // resolve(config)
-      reject('请求主动失败')
+      resolve(config)
+      // reject('请求主动失败')
     }, 3000)
   })
 })
@@ -63,12 +67,15 @@ axios({
   url: baseURL + '/info', 
   method: 'get', 
   params: user,
+  cancelToken: source.token,
   headers: { name: 'hlc' }
 }).then((res: AxiosResponse) => {
   console.log(res)
 }).catch(e => {
   console.log(e)
 })
+
+source.cancel('我取消了请求')
 
 // axios({ 
 //   url: baseURL + '/postinfo', 

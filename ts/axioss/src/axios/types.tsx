@@ -1,3 +1,5 @@
+import AxiosInterceptorManager from './AxiosInterceptorManager'
+
 export type Method =
   | 'get' | 'GET'
   | 'delete' | 'DELETE'
@@ -49,5 +51,9 @@ export interface AxiosResponse<T = any> {
 // 修饰Axios.prototype.request方法
 // Promise的泛型T是修饰Promise变成成功态以后resolve(value)中的value value:T 
 export interface AxiosInstance {
-  <T = any>(config: AxiosRequestConfig): Promise<AxiosResponse<T>>
+  <T = any>(config: AxiosRequestConfig): Promise<AxiosResponse<T>>;
+  interceptors: {
+    request: AxiosInterceptorManager<AxiosRequestConfig>;
+    response: AxiosInterceptorManager<AxiosResponse>;
+  }
 }

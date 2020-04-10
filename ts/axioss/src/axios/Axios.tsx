@@ -1,13 +1,39 @@
 import { AxiosRequestConfig, AxiosResponse } from './types'
+import AxiosInterceptorManager, { Interceptor } from './AxiosInterceptorManager'
 import qs from 'qs'
 import parseHeaders from 'parse-headers'
 
-export default class Axios{
-  // T是用来修饰response中的data的，所以返回值是AxiosResponse<T>类型
-  request<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
-    return this.dispatchRequest<T>(config)
+export default class Axios<T>{
+  public interceptors = {
+    request: new AxiosInterceptorManager<AxiosRequestConfig>(),
+    response: new AxiosInterceptorManager<AxiosResponse<T>>()
   }
-  dispatchRequest<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  // T是用来修饰response中的data的，所以返回值是AxiosResponse<T>类型
+  request(config: AxiosRequestConfig): Promise<AxiosRequestConfig | AxiosResponse<T>> {
+    // 先放入处理请求的函数
+    const chain: Array<Interceptor<AxiosRequestConfig> | Interceptor<AxiosResponse<T>>> = [
+      { onFulfilled: this.dispatchRequest }
+    ]
+
+    // 放入请求拦截器,先写的后执行
+    this.interceptors.request.interceptorQueue.forEach((interceptor: Interceptor<AxiosRequestConfig> | null) => {
+      interceptor && chain.unshift(interceptor)
+    })
+    // 放入响应拦截器
+    this.interceptors.response.interceptorQueue.forEach((interceptor: Interceptor<AxiosResponse<T>> | null) => {
+      interceptor && chain.push(interceptor)
+    })
+
+    let promise: any = Promise.resolve(config)
+
+    while(chain.length) {
+      const { onFulfilled, onRejected } = chain.shift()!
+      promise = promise.then(onFulfilled, onRejected)
+    }
+
+    return promise
+  }
+  dispatchRequest<T>(config: AxiosRequestConfig): Promise<AxiosRequestConfig | AxiosResponse<T>> {
     return new Promise<AxiosResponse<T>>((resolve, reject) => {
       const { url, method, params, headers, data, timeout } = config
       const xhr: XMLHttpRequest = new XMLHttpRequest()
