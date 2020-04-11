@@ -1,118 +1,40 @@
-import React, { useState } from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import './index.css'
 
-// 函数的实现方式
-function createContext() {
-  const context = {}
-  function Provider(props) {
-    context.value = props.value
-    return props.children
+function Wecome(props) {
+  function parentClick(e) {
+    console.log('父组件', e)
   }
-  function Consumer(props) {
-    return props.children(context.value)
+  function childClick(e) {
+    e.persist()
+    setTimeout(() => {
+      console.log('子组件', e)
+    }, 2000)
   }
-  context.Provider = Provider
-  context.Consumer = Consumer
-  return context
+  return <div id={props.id} style={props.style} onClick={parentClick}>
+    函数式组件
+    <span style={{ float: 'right' }} onClick={childClick}>welcome to china</span>
+  </div>
 }
 
-function useContext(context) {
-  return context.value
-}
-// 类的实现方式
-// function createContext() {
-//   let context = {}
-//   class Provider extends React.Component {
-//     render() {
-//       context = this.props.value
-//       return this.props.children
-//     }
-//   }
-//   class Consumer extends React.Component {
-//     render() {
-//       return this.props.children(context)
-//     }
-//   }
-//   return {
-//     Provider,
-//     Consumer
-//   }
-// }
-
-const ColorContext = createContext()
-
-function ChildOne() {
-  const theme = useContext(ColorContext)
-  const style = {
-    border: `2px solid ${theme.color}`
-  }
-  return (
-    <div style={style}>
-      <p>子元素1</p>
-      <button onClick={() => theme.setColor('red')}>边框变红</button>
+class Welcome extends Component {
+  render() {
+    return <div id={this.props.id} style={this.props.style}>
+      我是类组件
+      {
+        React.createElement('div', { id: 'container', style: { color: 'red' } }, React.createElement('span', { id: 'box1', style: { color: 'deepskyblue' } }, 'hello'), React.createElement('span', { id: 'box2', className: 'container' }, 'world'))
+      }
     </div>
-  )
-}
-
-
-function ChildTwo() {
-  const theme = useContext(ColorContext)
-  const style = {
-    border: `2px solid ${theme.color}`
   }
-  return (
-    <div style={style}>
-      <p>子元素2</p>
-      <button onClick={() => theme.setColor('green')}>边框变绿</button>
-    </div>
-  )
 }
 
-// function ChildOne() {
-//   return (
-//     <ColorContext.Consumer>
-//       {
-//       value => (
-//         <div style={{ border: `2px solid ${value.color}` }}>
-//           <p>子元素1</p>
-//           <button onClick={() => value.setColor('red')}>边框变红</button>
-//         </div>
-//       )
-//     }
-//     </ColorContext.Consumer>
-//   )
-// }
+// const element = React.createElement('div', { id: 'container', style: { color: 'red' } }, React.createElement('span', { id: 'box1', style: { color: 'deepskyblue' } }, 'hello'), React.createElement('span', { id: 'box2', className: 'container' }, 'world'))
 
-// function ChildTwo() {
-//   return (
-//     <ColorContext.Consumer>
-//       {
-//       value => (
-//         <div style={{ border: `2px solid ${value.color}` }}>
-//           <p>子元素2</p>
-//           <button onClick={() => value.setColor('green')}>边框变绿色</button>
-//         </div>
-//       )
-//     }
-//     </ColorContext.Consumer>
-//   )
-// }
+const element = React.createElement(Wecome, { id: 'weblcomeClass', style: { color: 'red', backgroundColor: 'green' } })
 
-function Container(props) {
-  const [color, setColor] = useState('red')
-  return (
-    <ColorContext.Provider value={{ color, setColor }}>
-      <div style={{ border: `2px solid ${color}` }}>
-        <ChildOne />
-        <ChildTwo />
-      </div>
-    </ColorContext.Provider>
-  )
-}
-
+console.log(element)
+// debugger
 ReactDOM.render(
-  <Container />
+  element
   , document.getElementById('root')
 );
-
