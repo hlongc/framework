@@ -1,3 +1,5 @@
+import { Component, PureComponent } from './component'
+
 const hasSymbol = typeof Symbol === 'function' && Symbol.for;
 export const REACT_ELEMENT_TYPE = hasSymbol
     ? Symbol.for('react.element')
@@ -11,19 +13,6 @@ const RESERVED = {
 }
 
 const ReactCurrentOwn = { current: null }
-
-class Component {
-  constructor(props, context) {
-    this.props = props
-    this.context = context
-  }
-}
-// isReactComponent用来标记当前是类组件
-Component.prototype.isReactComponent = {}
-
-class PureComponent extends Component{}
-// 标记当前是纯类组件
-PureComponent.prototype.isPureReactComponent = true
  
 // 创建react元素
 function ReactElement(type, ref, key, _self, _source, _owner, props) {
@@ -40,7 +29,7 @@ function ReactElement(type, ref, key, _self, _source, _owner, props) {
 }
 
 // 处理传入参数
-function createElement(type, config, children) {
+function createElement(type, config, ...children) {
   const props = {}
   let propName = ''
 
@@ -79,12 +68,15 @@ function createElement(type, config, children) {
   }
 
   // 处理子元素
-  const childrenLength = arguments.length - 2
-  if (childrenLength === 1) {
-    props.children = children
-  } else if (childrenLength > 1) {
-    props.children = Array.prototype.slice.call(arguments, 2)
-  }
+  // const childrenLength = arguments.length - 2
+  // if (childrenLength === 1) {
+  //   props.children = children
+  // } else if (childrenLength > 1) {
+  //   props.children = Array.prototype.slice.call(arguments, 2)
+  // }
+  props.children = children.map(child => {
+    return typeof child === 'object' ? child : { content: child }
+  })
 
   return ReactElement(type, ref, key, _self, _source, ReactCurrentOwn.current, props)
 }

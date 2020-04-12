@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import React, { Component } from './react';
+import ReactDOM from './react-dom';
 
 function Wecome(props) {
   function parentClick(e) {
