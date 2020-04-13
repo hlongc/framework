@@ -1,40 +1,40 @@
-import React, { Component } from './react';
-import ReactDOM from './react-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { Provider } from './react-redux'
+import { createStore } from './redux'
+// import store from './store'
+import reducers from './reducer/reducers'
+import Counter from './Counter'
 
-function Wecome(props) {
-  function parentClick(e) {
-    console.log('父组件', e)
-  }
-  function childClick(e) {
-    e.persist()
-    setTimeout(() => {
-      console.log('子组件', e)
-    }, 2000)
-  }
-  return <div id={props.id} style={props.style} onClick={parentClick}>
-    函数式组件
-    <span style={{ float: 'right' }} onClick={childClick}>welcome to china</span>
-  </div>
-}
-
-class Welcome extends Component {
-  render() {
-    return <div id={this.props.id} style={this.props.style}>
-      我是类组件
-      {
-        React.createElement('div', { id: 'container', style: { color: 'red' } }, React.createElement('span', { id: 'box1', style: { color: 'deepskyblue' } }, 'hello'), React.createElement('span', { id: 'box2', className: 'container' }, 'world'))
-      }
-    </div>
+function logger({ dispatch, getState }) {
+  return function(next) { // next代表下一个中间件或者真正的store.dispatch
+    return function(action) { // 增强以后的dispatch方法
+      console.log('老状态', getState())
+      next(action)
+      console.log('新状态', getState())
+    }
   }
 }
 
-// const element = React.createElement('div', { id: 'container', style: { color: 'red' } }, React.createElement('span', { id: 'box1', style: { color: 'deepskyblue' } }, 'hello'), React.createElement('span', { id: 'box2', className: 'container' }, 'world'))
+function applyMiddlewares(middleware) {
+  return function(createStore) {
+    return function(reducer) {
+      const store = createStore(reducer)
+      let dispatch
+      middleware = middleware({
+        getState: store.getState,
+        dispatch: action => dispatch(action)
+      })
+      dispatch = middleware(store.dispatch) // 传入真正的dispatch，只有第一个中间件才能收到真正的dispatch
+      return { ...store, dispatch }
+    }
+  }
+}
 
-const element = React.createElement(Wecome, { id: 'weblcomeClass', style: { color: 'red', backgroundColor: 'green' } })
+const store = applyMiddlewares(logger)(createStore)(reducers)
 
-console.log(element)
-// debugger
 ReactDOM.render(
-  element
-  , document.getElementById('root')
-);
+  <Provider store={store}>
+    <Counter />
+  </Provider>
+  , document.getElementById('root'))
