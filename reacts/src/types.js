@@ -1,4 +1,5 @@
 export default {
   ADD: 'ADD',
-  MINUS: 'MINUS'
+  MINUS: 'MINUS',
+  THUNK: 'THUNK'
 }
