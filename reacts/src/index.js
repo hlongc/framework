@@ -1,19 +1,26 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Provider } from './react-redux'
-import { createStore, applyMiddlewares } from './redux'
-// import store from './store'
-import reducers from './reducer/reducers'
-import Counter from './Counter'
-import promise from './middlewares/promise'
-import thunk from './middlewares/thunk'
-import logger from './middlewares/logger'
-
-
-const store = applyMiddlewares(promise, thunk, logger)(createStore)(reducers)
+import { HashRouter as Router, Route, Link, Switch, Redirect } from './react-router-dom'
+import Home from './components/home'
+import Info from './components/info'
+import User from './components/user'
 
 ReactDOM.render(
-  <Provider store={store}>
-    <Counter />
-  </Provider>, 
-document.getElementById('root'))
+  <Router>
+    <ul>
+      <li><Link to="/">首页</Link></li>
+      <li><Link to="/info">个人中心</Link></li>
+      <li><Link to="/user">列表页</Link></li>
+    </ul>
+    <Switch>
+      <Route path="/" component={Home} exact={true} />
+      <Route path="/info" component={Info} />
+      <Route path="/info" component={Info} />
+      <Route path="/user" component={User} />
+      <Redirect from="/home" to="/" />
+    </Switch>
+  </Router>,
+  document.getElementById('root')
+)
+
+
