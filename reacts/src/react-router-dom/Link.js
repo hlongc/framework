@@ -10,6 +10,6 @@ export default class Link extends React.Component {
   }
 
   render() {
-    return <a href={`#${this.props.to}`} onClick={e => this.handleClick(e)}>{this.props.children}</a>
+    return <a href={`#${this.props.to}`} {...this.props} onClick={e => this.handleClick(e)}>{this.props.children}</a>
   }
 }

@@ -1,3 +1,5 @@
+import { updateQueue } from '../react/component'
+
 let syntheticEvent // 全局使用同一个合成事件对象，一般情况使用之后马上重置所有属性
 export function handleEvent(dom, eventName, listener) {
   eventName = eventName.slice(2).toLowerCase() // 把事件名称转换为小写
@@ -30,6 +32,7 @@ function dispatchEvent(e) {
     }
   }
   let current = target
+  updateQueue.isPending = true
   while (current) {
     // 最顶级的app元素没有eventMap属性，需要判断一下
     if (current.eventMap && current.eventMap[type]) { // 如果当前元素绑定了此类型的事件，就让它执行并传入合成事件对象
@@ -41,4 +44,5 @@ function dispatchEvent(e) {
   for (const key in syntheticEvent) {
     syntheticEvent[key] = null
   }
+  updateQueue.isPending = false
 }

@@ -1,4 +1,4 @@
-const updateQueue = {
+export const updateQueue = {
   isPending: false, // false表示当前不是批量更新模式，true表示当前为批量更新模式
   updaters: [], // 全局更新队列，包含一个个待更新的updater实例
   add(updater) { // 向队列中新增updater
