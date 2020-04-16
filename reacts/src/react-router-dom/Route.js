@@ -5,6 +5,7 @@ import RouterContext from './RouterContext'
 export default class Route extends React.Component {
   static contextType = RouterContext
   render() {
+    // exact 是否要进行精准匹配
     const { path = '/', component: Component, exact = false, render, children } = this.props
     const pathname = this.context.location.pathname // 当前url上的pathname
     let paramNames = []

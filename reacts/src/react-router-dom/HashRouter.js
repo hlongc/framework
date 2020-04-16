@@ -26,7 +26,19 @@ export default class HashRouter extends React.Component {
   render() {
     const history = {
       location: this.state.location,
+      block(message) {
+        history.message = message
+      },
+      unblock() {
+        history.message = null
+      },
       push(pathname, state) {
+        if (history.message) {
+          const location = typeof pathname === 'string' ? { pathname } : pathname
+          const message = typeof history.message === 'function' ? history.message(location) : history.message
+          const confirm = window.confirm(message)
+          if (!confirm) return // 取消跳转
+        }
         window.location.hash = pathname
       }
     }
