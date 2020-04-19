@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react'
+import React, { useReducer, useState } from 'react'
 
 /**
  * hooks作者和redux作者是同一个人，所以风格类似
@@ -7,6 +7,17 @@ import React, { useReducer } from 'react'
 
 const ADD = 'ADD'
 const MINUS = 'MINUS'
+
+// funtion useReducer(reducer, initialState) {
+//   const [state, setState] = useState(initialState)
+
+//   function dispatch(action) {
+//     const nextState = reducer(state, action)
+//     setState(nextState)
+//   }
+
+//   return [state, dispatch]
+// }
 
 function reducer(state, action) {
   switch (action.type) {
