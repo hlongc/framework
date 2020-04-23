@@ -1,10 +1,8 @@
 import { Component, PureComponent } from './component'
+import { REACT_ELEMENT_TYPE, TEXT, ELEMENT, FUNCTION_COMPONENT, CLASS_COMPONENT } from './constant'
+import ReactCurrentOwner from './ReactCurrentOwner'
 
-const hasSymbol = typeof Symbol === 'function' && Symbol.for;
-export const REACT_ELEMENT_TYPE = hasSymbol
-    ? Symbol.for('react.element')
-    : 0xeac7;
-
+// 保留字段
 const RESERVED = {
   ref: true,
   key: true,
@@ -12,18 +10,22 @@ const RESERVED = {
   _source: true
 }
 
-const ReactCurrentOwn = { current: null }
- 
 // 创建react元素
 function ReactElement(type, ref, key, _self, _source, _owner, props) {
+  let $$typeof = typeof type === 'string' ? ELEMENT : REACT_ELEMENT_TYPE
+  if (typeof type === 'string') {
+    $$typeof = ELEMENT
+  } else if (typeof type === 'function') {
+    $$typeof = type.prototype.isReactComponent ? CLASS_COMPONENT : FUNCTION_COMPONENT
+  }
   return {
-    $$typeof: REACT_ELEMENT_TYPE,
+    $$typeof,
     type,
     ref,
     key,
-    _self,
-    _source,
-    _owner,
+    _self, // this指向
+    _source, // 源码位置
+    _owner, // 谁拥有这个组件
     props
   }
 }
@@ -75,15 +77,18 @@ function createElement(type, config, ...children) {
   //   props.children = Array.prototype.slice.call(arguments, 2)
   // }
   props.children = children.map(child => {
-    return typeof child === 'object' ? child : { content: child }
+    // 将文本节点处理为一个对象，便于后续dom-diff
+    return typeof child === 'object' ? child : { $$typeof: TEXT, type: TEXT , content: child }
   })
 
-  return ReactElement(type, ref, key, _self, _source, ReactCurrentOwn.current, props)
+  return ReactElement(type, ref, key, _self, _source, ReactCurrentOwner.current, props)
 }
 
 
 export default {
-  createElement
+  createElement,
+  Component,
+  PureComponent
 }
 
 export {

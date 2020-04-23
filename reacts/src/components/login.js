@@ -6,7 +6,6 @@ export default class Login extends React.Component {
     this.input = createRef()
   }
   login = () => {
-    console.log(this.input.current.value)
     const username = this.input.current.value
     if (!username) return
     sessionStorage.setItem('username', username)

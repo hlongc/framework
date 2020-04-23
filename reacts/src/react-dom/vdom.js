@@ -1,69 +1,14 @@
-import { handleEvent } from './event'
-
-function flatten(arr) {
-  let res = []
-  if (arr && arr.length) {
-    arr.forEach(item => {
-      if (Array.isArray(item)) {
-        res = res.concat(flatten(item))
-      } else {
-        res.push(item)
-      }
-    })
-  }
-  return res
-}
-
-const RESERVED = {
-  ref: true,
-  key: true,
-  _self: true,
-  _source: true,
-  _owner: true
-}
+import { TEXT, ELEMENT, FUNCTION_COMPONENT, CLASS_COMPONENT } from '../react/constant'
+import { onlyOne, setProps } from './utils'
 
 // 创建子元素节点
 function createChildren(parentContainer, parentVNode) {
-  if (parentVNode.props.children && parentVNode.props.children.length) {
-    parentVNode.props.children.flat(Infinity).forEach((child, index) => {
-      const dom = createDOM(child)
-      child._mountIndex = index // 此索引会在dom-diff时用到
-      child.dom = dom
-      parentContainer.appendChild(dom)
-    })
-  }
-}
-
-function setProps(dom, props) {
-  delete props.__source
-  delete props.__self
-  for (const propName in props) {
-    if (RESERVED.hasOwnProperty(propName)) continue
-    if (propName === 'children') { // 孩子节点已经处理过了，跳过
-      continue
-    } else if (propName === 'className') {
-      dom.className = props.className
-    } else if (propName === 'style') {
-      const styleObj = props.style
-      // 这种写法会导致多次重绘与回流，并且要处理float: dom.cssFloat = 'left'
-      // for (const attr in styleObj) {
-      //   dom.style[attr] = styleObj[attr]
-      // }
-      // 使用下列方法一次性处理好再修改属性，降低渲染成本
-      const cssText = Object.keys(styleObj).map(attrName => {
-        // 把backgroudColor => backgroud-color
-        const attrName1 = attrName.replace(/([A-Z])/g, function() {
-          return '-' + arguments[1].toLowerCase()
-        })
-        return `${attrName1}:${styleObj[attrName]}`
-      }).join(';')
-      dom.style.cssText = cssText
-    } else if (propName.startsWith('on')) { // 处理绑定事件
-      handleEvent(dom, propName, props[propName])
-    } else if (!RESERVED.hasOwnProperty(propName)) {
-      dom.setAttribute(propName, props[propName])
-    }
-  }
+  parentVNode.props.children.flat(Infinity).forEach((child, index) => {
+    const dom = createDOM(child) // 递归创建孩子节点
+    child._mountIndex = index // 此索引会在dom-diff时用到,标记它在父元素中子节点的位置
+    child.dom = dom // 虚拟节点和真实节点对应
+    parentContainer.appendChild(dom)
+  })
 }
 
 // 创建原生dom元素
@@ -74,6 +19,7 @@ function createNativeDOM(vnode) {
   setProps(dom, props)
   return dom
 }
+
 // 生成类组件元素
 function createClassComponentDOM(vnode) {
   const { type: Component, props } = vnode
@@ -81,8 +27,8 @@ function createClassComponentDOM(vnode) {
   const renderElement = instance.render() // 获取到返回的react元素
   const dom = createDOM(renderElement)
   vnode.instance = instance // 记录当前虚拟dom的实例
-  vnode.renderElement = renderElement
-  vnode.dom = dom // 当前实例对应的真实dom元素
+  instance.renderElement = renderElement
+  renderElement.dom = dom // 当前实例对应的真实dom元素
   return dom
 }
 
@@ -92,30 +38,26 @@ function createFunctionComponentDOM(vnode) {
   const renderElement = type(props)
   const dom = createDOM(renderElement)
   vnode.renderElement = renderElement
-  vnode.dom = dom
+  vnode.renderElement.dom = dom
   return dom
 }
 
-
-function createDOM(vnode) {
+// 通过虚拟dom创建真实节点
+export function createDOM(vnode) {
+  vnode = onlyOne(vnode)
   const { $$typeof, type } = vnode
   let dom = null
-  if (!$$typeof) { // 不存在这个属性说明不是react元素，是文本节点
-    dom = document.createTextNode(vnode.content || vnode)
+  if (!$$typeof) { // ReactDOM.render('hhh', document.getElementById('root'))，这种情况就没有$$typeof
+    dom = document.createTextNode(type)
+  } else if ($$typeof === TEXT) { // 创建文本节点
+    dom = document.createTextNode(vnode.content)
+  } else if($$typeof === ELEMENT) { // 如果是普通标签那就创建原生dom
+    dom = createNativeDOM(vnode)
+  } else if ($$typeof === CLASS_COMPONENT) { // 类组件
+    dom = createClassComponentDOM(vnode)
   } else {
-    if (typeof type === 'string') { // 表明当前就是一个普通的html标签, 直接创建
-      dom = createNativeDOM(vnode)
-    } else if (typeof type === 'function') {
-      if (type.prototype.isReactComponent) { // 类组件才拥有此属性
-        dom = createClassComponentDOM(vnode) // 类组件
-      } else {
-        dom = createFunctionComponentDOM(vnode) // 函数组件
-      }
-    }
+    dom = createFunctionComponentDOM(vnode) // 函数组件
   }
+  vnode.dom = dom // 虚拟节点和真实节点对应
   return dom  
-}
-
-export {
-  createDOM
 }

@@ -1,3 +1,6 @@
+import { onlyOne } from "../react-dom/utils";
+import { createDOM } from "../react-dom/vdom";
+
 export const updateQueue = {
   isPending: false, // false表示当前不是批量更新模式，true表示当前为批量更新模式
   updaters: [], // 全局更新队列，包含一个个待更新的updater实例
@@ -19,7 +22,7 @@ class Updater{
   constructor(componentInstance) {
     this.componentInstance = componentInstance // updater和类组件一一对应
     this.pendingState = [] // 当前组件未处理的state更新队列
-    this.nextProps = null
+    this.nextProps = null // 新的属性对象
   }
 
   addState(updater) {
@@ -43,12 +46,12 @@ class Updater{
     }
   }
   getState() {
-    let { pendingState, nextProps, componentInstance: { state } } = this
-
+    let { pendingState, nextProps, componentInstance } = this
+    let state = componentInstance.state
     if (pendingState.length) {
       pendingState.forEach(nextState => {
         if (typeof nextState === 'function') { // 如果setState传入的是一个函数，那么执行它得到改变的结果
-          nextState = nextState(state, nextProps)
+          nextState = nextState.call(componentInstance, state, nextProps)
         }
         state = { ...state, ...nextState }
       })
@@ -68,33 +71,45 @@ function shouldUpdate(componentInstance, nextProps, nextState) {
   }
   componentInstance.forceUpdate()
 }
-
+// 新老节点比较
 function compareElement(oldVNode, newVNode) {
+  oldVNode = onlyOne(oldVNode)
+  newVNode = onlyOne(newVNode)
+
+  let oldDom = oldVNode.dom
+  let currentNode = oldVNode
   if (newVNode === null) { // 新节点被删除了，则移除老节点
-    oldVNode.dom.parentNode.removeChild(oldVNode.dom)
-  } else if (newVNode.type !== newVNode.type) {
-    
+    oldDom.parentNode.removeChild(oldDom)
+  } else if (newVNode.type !== newVNode.type) { // 类型不同，直接重新创建
+    currentNode = createDOM(newVNode)
+    oldDom.parentNode.replaceChild(currentNode.dom, oldDom)
+  } else { // 如果类型相同，那么进行dom-diff
+    currentNode = createDOM(newVNode)
+    oldDom.parentNode.replaceChild(newVNode.dom, oldDom)
   }
+  return newVNode
 }
 
 class Component {
   constructor(props, context) {
     this.props = props
     this.context = context
-    this.$updater = new Updater(this)
-    this.nextProps = null
-    this.state = {}
+    this.$updater = new Updater(this) // 每个类组件的更新器
+    this.nextProps = null // 下个属性
+    this.state = {} // 当前状态
   }
 
   setState(partialState) {
-    this.$updater.addState(partialState)
+    this.$updater.addState(partialState) // 放到更新队列中
   }
 
   forceUpdate() {
+    // renderElement 这个是上一次渲染的实例
     const { props, state, renderElement: oldRenderElement } = this
     if (this.componentWillUpdate) this.componentWillUpdate(props, state)
     const newRenderElement = this.render() // 重新render获取新的react元素
     const currentRenderElement = compareElement(oldRenderElement, newRenderElement)
+    // 把新的实例赋给renderElement供下次使用
     this.renderElement = currentRenderElement
     if (this.componentDidUpdate) this.componentDidUpdate(props, state)
   }
