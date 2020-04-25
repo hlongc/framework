@@ -10,14 +10,19 @@ export function handleEvent(dom, eventName, listener) {
 
 function persist() {
   // 持久化的思路就是将syntheticEvent指向一个新的对象，后面清除属性就是清除的当前的新的，而之前的不会被清除
-  syntheticEvent = { persist }
+  syntheticEvent = {}
 }
 
 // 更新当前syntheticEvent合成事件对象属性
 function updateSyntheticEvent(e) {
   if (!syntheticEvent) { // 第一次进来没有就创建新的
-    syntheticEvent = { persist }
+    syntheticEvent = {}
   }
+  // syntheticEvent.__proto__.persist = persist
+  Object.defineProperty(syntheticEvent, 'persist', {
+    enumerable: false,
+    value: persist
+  })
   syntheticEvent.nativeEvent = e
   syntheticEvent.currentTarget = e.target
   for (const key in e) {
@@ -44,8 +49,9 @@ function dispatchEvent(e) {
   }
   // 执行完毕以后重置事件对象
   for (const key in syntheticEvent) {
-    if (key === 'persist') continue
-    syntheticEvent[key] = null
+    if (syntheticEvent.hasOwnProperty(key)) {
+      syntheticEvent[key] = null
+    }
   }
   // 事件执行结束之后改成非批量更新模式
   updateQueue.isPending = false

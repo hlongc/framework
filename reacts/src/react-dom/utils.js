@@ -26,6 +26,19 @@ export function flatten(arr) {
   return res
 }
 
+export function pacthProps(dom, oldProps, newProps) {
+  // 老节点有的新节点没有，删除
+  for (const key in oldProps) {
+    if (key === 'children') continue
+    if (!newProps.hasOwnProperty(key)) {
+      dom.removeAttribute(key)
+    }
+  }
+  // 新节点有点老节点没有新增
+  // 新老节点都有的，更新
+  setProps(dom, newProps)
+}
+
 // 处理元素的属性
 export function setProps(dom, props) {
   delete props.__source

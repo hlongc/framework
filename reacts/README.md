@@ -1,3 +1,5 @@
+1、未找到props上面为什么多出persist属性的原因
+2、没想通为什么类组件实例上能取到renderElement
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

@@ -17,18 +17,40 @@ import ReactDOM from './react-dom';
 //   </div>
 // }
 
-class Welcome extends Component {
+function FunctionComponent(props) {
+  return <button a={props.count} onClick={props.handleClick}>{props.count}</button>
+}
 
-  state = {
-    count: 1
-  }
-
-  handleClick = e => {
-    this.setState(prevState => ({ count: prevState.count + 1 }))
-  }
-
+class ClassComponent extends Component {
   render() {
-    return <button onClick={this.handleClick}>{this.state.count}</button>
+    return <button a={this.props.count} onClick={this.props.handleClick}>{this.props.count}</button>
+  }
+}
+
+class Welcome extends Component {
+  state = {
+    show: false
+  }
+  handleClick = e => {
+    this.setState(prevState => ({ show: !prevState.show }))
+  }
+  render() {
+    return this.state.show ? (
+      <ul onClick={this.handleClick}>
+        <li key="A">A</li>
+        <li key="B">B</li>
+        <li key="C">C</li>
+        <li key="D">D</li>
+      </ul>
+    ) : (
+      <ul onClick={this.handleClick}>
+        <li key="A">A</li>
+        <li key="E">E</li>
+        <li key="B">B</li>
+        <li key="D">D</li>
+        <li key="C">C</li>
+      </ul>
+    )
   }
 }
 

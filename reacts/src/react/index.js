@@ -12,7 +12,7 @@ const RESERVED = {
 
 // 创建react元素
 function ReactElement(type, ref, key, _self, _source, _owner, props) {
-  let $$typeof = typeof type === 'string' ? ELEMENT : REACT_ELEMENT_TYPE
+  let $$typeof
   if (typeof type === 'string') {
     $$typeof = ELEMENT
   } else if (typeof type === 'function') {
