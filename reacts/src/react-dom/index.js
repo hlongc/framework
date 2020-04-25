@@ -1,4 +1,5 @@
 import { createDOM } from './vdom'
+import { updateQueue } from '../react/component'
 
 /**
  * @param {Object} node react元素
@@ -9,7 +10,15 @@ function render(node, container) {
   container.appendChild(dom)
 }
 
-
+function unstable_batchedUpdates(fn) {
+  updateQueue.isPending = true
+  fn()
+  updateQueue.isPending = false
+  updateQueue.batchUpdate()
+}
+export {
+  unstable_batchedUpdates
+}
 export default {
   render
 }

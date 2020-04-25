@@ -1,4 +1,4 @@
-import React, { Component } from './react';
+import React, { Component, createRef, createContext, useContext } from './react';
 import ReactDOM from './react-dom';
 
 // function Wecome(props) {
@@ -17,39 +17,130 @@ import ReactDOM from './react-dom';
 //   </div>
 // }
 
-function FunctionComponent(props) {
-  return <button a={props.count} onClick={props.handleClick}>{props.count}</button>
+// function FunctionComponent(props) {
+//   return <button a={props.count} onClick={props.handleClick}>{props.count}</button>
+// }
+
+// class ClassComponent extends Component {
+//   render() {
+//     return <button a={this.props.count} onClick={this.props.handleClick}>{this.props.count}</button>
+//   }
+// }
+
+const ColorContext = createContext()
+
+function GrandSon() {
+  const context = useContext(ColorContext)
+  return (
+    <div>
+      <button onClick={() => context.changeColor('green')}>变绿</button>
+      <button onClick={() => context.changeColor('red')}>变红</button>
+    </div>
+  )
 }
 
-class ClassComponent extends Component {
+class Child extends Component {
+  static contextType = ColorContext
+  state = {
+    name: 'xixi'
+  }
+  // componentWillMount() {
+  //   console.log('Child componentWillMount')
+  // }
+  componentDidMount() {
+    console.log('Child componentDidMount')
+  }
+  // componentWillReceiveProps(nextProps) {
+  //   console.log('Child componentWillReceiveProps')
+  // }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    console.log('Child getDerivedStateFromProps')
+    return { nickname: prevState.name + nextProps.count }
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('Child shouldComponentUpdate')
+    return nextProps.count > 2
+  }
+  // componentWillUpdate() {
+  //   console.log('Child componentWillUpdate')
+  // }
+  getSnapshotBeforeUpdate() {
+    console.log('Child getSnapshotBeforeUpdate')
+    return 'getSnapshotBeforeUpdate的返回值'
+  }
+  componentDidUpdate(prevProps, prevState, extra) {
+    console.log('Child componentDidUpdate', extra)
+  }
+  componentWillUnmount() {
+    console.log('Child componentWillUnmount')
+  }
   render() {
-    return <button a={this.props.count} onClick={this.props.handleClick}>{this.props.count}</button>
+    console.log('Child render', this.state, this.context)
+    return (
+      <div>
+        { this.context.color }
+        <div>{this.props.count}</div>
+        <GrandSon />
+      </div>
+    )
   }
 }
 
 class Welcome extends Component {
-  state = {
-    show: false
+  constructor() {
+    super()
+    this.state = {
+      count: 0,
+      color: 'red'
+    }
+    this.btn = createRef()
+    console.log('Welcome constructor')
+  }
+  componentWillMount() {
+    console.log('Welcome componentWillMount')
+  }
+  componentDidMount() {
+    console.log('Welcome componentDidMount')
+    this.setState({ count: this.state.count - 1 })
+    console.log(this.state.count)
+    this.setState({ count: this.state.count - 1 })
+    console.log(this.state.count)
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('Welcome shouldComponentUpdate')
+    return nextState.count > 1
+  }
+  componentWillUpdate() {
+    console.log('Welcome componentWillUpdate')
+  }
+  componentDidUpdate() {
+    console.log('Welcome componentDidUpdate')
+  }
+  changeColor = (color) => {
+    console.log(color)
+    this.setState({ color })
   }
   handleClick = e => {
-    this.setState(prevState => ({ show: !prevState.show }))
+    console.log(this.btn.current)
+    this.setState(prevState => ({ count: prevState.count + 1 }))
   }
   render() {
-    return this.state.show ? (
-      <ul onClick={this.handleClick}>
-        <li key="A">A</li>
-        <li key="B">B</li>
-        <li key="C">C</li>
-        <li key="D">D</li>
-      </ul>
-    ) : (
-      <ul onClick={this.handleClick}>
-        <li key="A">A</li>
-        <li key="E">E</li>
-        <li key="B">B</li>
-        <li key="D">D</li>
-        <li key="C">C</li>
-      </ul>
+    console.log('Welcome render', this.state)
+    const value = {
+      color: this.state.color,
+      changeColor: this.changeColor
+    }
+    return (
+      <ColorContext.Provider value={value}>
+        <div style={{ color: this.state.color }}>
+          { this.state.count }
+          { this.state.count > 4 ? null : <Child count={this.state.count} /> }
+          <button ref={this.btn} onClick={this.handleClick}>+</button>
+          <p>
+            { [<span>{this.state.count}--嘻嘻</span>, <span>{this.state.count}--哈哈</span>] }
+          </p>
+        </div>
+      </ColorContext.Provider>
     )
   }
 }
@@ -58,8 +149,6 @@ class Welcome extends Component {
 
 const element = React.createElement(Welcome, { id: 'weblcomeClass', style: { color: 'red', backgroundColor: 'green' } })
 
-console.log(element)
-// debugger
 ReactDOM.render(
   element
   , document.getElementById('root')

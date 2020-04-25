@@ -1,5 +1,6 @@
 import { onlyOne, pacthProps } from "../react-dom/utils";
 import { createDOM } from "../react-dom/vdom";
+import { unstable_batchedUpdates } from '../react-dom'
 import { TEXT, ELEMENT, FUNCTION_COMPONENT, CLASS_COMPONENT, MOVE, REMOVE, INSERT } from "./constant";
 
 let depth = 0 // 当前遍历的深度
@@ -70,7 +71,7 @@ function shouldUpdate(componentInstance, nextProps, nextState) {
   componentInstance.props = nextProps
   componentInstance.state = nextState
   // 如果传入了componentShouldUpdate生命周期，并且返回值是假值的话，那么不会进行视图更新
-  if (componentInstance.componentShouldUpdate && !componentInstance.componentShouldUpdate(nextProps, nextState)) {
+  if (componentInstance.shouldComponentUpdate && !componentInstance.shouldComponentUpdate(nextProps, nextState)) {
     return
   }
   componentInstance.forceUpdate()
@@ -85,7 +86,7 @@ function compareElement(oldVNode, newVNode) {
   if (newVNode === null) { // 新节点被删除了，则移除老节点
     oldDom.parentNode.removeChild(oldDom)
     currentNode = null
-  } else if (newVNode.type !== newVNode.type) { // 类型不同，直接重新创建
+  } else if (oldVNode.type !== newVNode.type) { // 类型不同，直接重新创建
     const currentDOM = createDOM(newVNode)
     oldDom.parentNode.replaceChild(currentDOM, oldDom)
   } else { // 如果类型相同，那么进行dom-diff
@@ -104,7 +105,7 @@ function updateElement(oldVNode, newVNode) {
     updateDOMProperties(dom, oldVNode.props, newVNode.props)
     // 更新孩子
     updateChildrenElements(dom, oldVNode.props.children, newVNode.props.children)
-    oldVNode.props = newVNode.props // 把新的属性给到老的节点上面，因为compareElement返回的是老节点
+    oldVNode.props = newVNode.props // 把新的属性给到老的节点上面，包括新的虚拟dom，因为compareElement返回的是老节点
   } else if (oldVNode.$$typeof === FUNCTION_COMPONENT) { // 函数组件更新
     updateFunctionComponent(oldVNode, newVNode)
   } else if (oldVNode.$$typeof === CLASS_COMPONENT) {
@@ -119,7 +120,8 @@ function patch() {
   patchQueue.forEach(diff => {
     const { type, from, parent } = diff
     if (type === MOVE || type === REMOVE) {
-      const dom = parent.children[from] // 从对应位置取到要删除的节点
+      // parentNode.children只能获取到非文本节点,而childNodes可以获取所有节点
+      const dom = parent.childNodes[from] // 从对应位置取到要删除的节点
       deleteList.push(dom)
       deleteMap[from] = dom // 后面可以复用，因为move是先删除后插入，所以要保留这个元素
     }
@@ -184,6 +186,12 @@ function diff(parent, oldChildren, newChildren) {
         })
       }
       newChild._mountIndex = index // 无论元素是否能被复用,都要更新挂载的索引
+    } else { // 如果新元素为Null，那么要卸载元素，并且执行生命周期
+      const key = index.toString()
+      const oldChild = oldChildrenMap[key]
+      if (oldChild && oldChild.instance.componentWillUnmount) {
+        unstable_batchedUpdates(() => oldChild.instance.componentWillUnmount())
+      }
     }
   })
 
@@ -222,15 +230,30 @@ function isSameElement(old, news) {
 
 function getOldChildrenMap(oldChildren) {
   return oldChildren.reduce((memo, current, index) => {
-    const key = current.key || index.toString() // 如果有key就用key,没有就用索引
-    memo[key] = current
+    if (current) {
+      const key = current.key || index.toString() // 如果有key就用key,没有就用索引
+      memo[key] = current
+    }
     return memo
   }, {})
 }
 
 function updateClassComponent(oldVNode, newVNode) {
-  const oldInstance = oldVNode.instance // 在第一次创建时，把创建的实例已经放到了虚拟dom上面
+  const oldInstance = newVNode.instance = oldVNode.instance // 在第一次创建时，把创建的实例已经放到了虚拟dom上面
   const nextProps = newVNode.props // 拿到最新属性
+  if (oldVNode.type.contextType) { // 如果有context这个静态属性，则给到实例上
+    oldInstance.context = oldVNode.type.contextType.Provider.value
+  }
+  if (oldInstance.componentWillReceiveProps) { // 执行生命周期函数
+    unstable_batchedUpdates(() => oldInstance.componentWillReceiveProps(nextProps))
+  }
+  if (oldVNode.type.getDerivedStateFromProps) {
+    // 获取衍生状态进行合并
+    const partialState = oldVNode.type.getDerivedStateFromProps(nextProps, oldInstance.state)
+    if (partialState) {
+      oldInstance.state = { ...oldInstance.state, ...partialState }
+    }
+  }
   oldInstance.$updater.emitUpdate(nextProps) // 实例上面有个更新器$updater,并且调用尝试更新的方法
 }
 
@@ -261,12 +284,15 @@ class Component {
   forceUpdate() {
     // renderElement 这个是上一次渲染的实例
     const { props, state, renderElement: oldRenderElement } = this
-    if (this.componentWillUpdate) this.componentWillUpdate(props, state)
+    if (this.componentWillUpdate) {
+      unstable_batchedUpdates(() => this.componentWillUpdate(props, state))
+    }
     const newRenderElement = this.render() // 重新render获取新的react元素
     const currentRenderElement = compareElement(oldRenderElement, newRenderElement)
+    const extra = this.getSnapshotBeforeUpdate && this.getSnapshotBeforeUpdate()
     // 把新的实例赋给renderElement供下次使用
     this.renderElement = currentRenderElement
-    if (this.componentDidUpdate) this.componentDidUpdate(props, state)
+    if (this.componentDidUpdate) this.componentDidUpdate(props, state, extra)
   }
 }
 // isReactComponent用来标记当前是类组件

@@ -1,5 +1,6 @@
-import { TEXT, ELEMENT, FUNCTION_COMPONENT, CLASS_COMPONENT } from '../react/constant'
+import { TEXT, ELEMENT, CLASS_COMPONENT } from '../react/constant'
 import { onlyOne, setProps } from './utils'
+import { unstable_batchedUpdates } from './index'
 
 // 创建子元素节点
 function createChildren(parentContainer, parentVNode) {
@@ -17,6 +18,9 @@ function createNativeDOM(vnode) {
   const dom = document.createElement(type) // 创建当前元素
   createChildren(dom, vnode) // 创建子元素
   setProps(dom, props)
+  if (vnode.ref) {
+    vnode.ref.current = dom
+  }
   return dom
 }
 
@@ -24,8 +28,26 @@ function createNativeDOM(vnode) {
 function createClassComponentDOM(vnode) {
   const { type: Component, props } = vnode
   const instance = new Component(props) // 创建实例
+  if (vnode.ref) {
+    vnode.ref.current = instance
+  }
+  if (Component.contextType) { // 处理静态属性
+    instance.context = Component.contextType.Provider.value
+  }
+  if (instance.componentWillMount) {
+    unstable_batchedUpdates(() => instance.componentWillMount())
+  }
+  if (Component.getDerivedStateFromProps) {
+    const partialState = Component.getDerivedStateFromProps(props, instance.state)
+    if (partialState) {
+      instance.state = { ...instance.state, ...partialState }
+    }
+  }
   const renderElement = instance.render() // 获取到返回的react元素
   const dom = createDOM(renderElement)
+  if (instance.componentDidMount) {
+    unstable_batchedUpdates(() => instance.componentDidMount())
+  }
   vnode.instance = instance // 记录当前虚拟dom的实例
   instance.renderElement = renderElement
   renderElement.dom = dom // 当前实例对应的真实dom元素

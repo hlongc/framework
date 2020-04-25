@@ -1,6 +1,7 @@
 import { Component, PureComponent } from './component'
-import { REACT_ELEMENT_TYPE, TEXT, ELEMENT, FUNCTION_COMPONENT, CLASS_COMPONENT } from './constant'
+import { TEXT, ELEMENT, FUNCTION_COMPONENT, CLASS_COMPONENT } from './constant'
 import ReactCurrentOwner from './ReactCurrentOwner'
+import { onlyOne } from '../react-dom/utils';
 
 // 保留字段
 const RESERVED = {
@@ -76,22 +77,48 @@ function createElement(type, config, ...children) {
   // } else if (childrenLength > 1) {
   //   props.children = Array.prototype.slice.call(arguments, 2)
   // }
+  children = children.flat(Infinity)
   props.children = children.map(child => {
     // 将文本节点处理为一个对象，便于后续dom-diff
-    return typeof child === 'object' ? child : { $$typeof: TEXT, type: TEXT , content: child }
+    return (typeof child === 'object' || typeof child === 'function') ? child : { $$typeof: TEXT, type: TEXT , content: child }
   })
 
   return ReactElement(type, ref, key, _self, _source, ReactCurrentOwner.current, props)
 }
 
+function createRef() {
+  return { current: null }
+}
+
+function createContext(defaultValue) {
+  Provider.value = defaultValue
+  function Provider(props) {
+    Provider.value = props.value
+    return props.children
+  }
+  function Consumer(props) {
+    return onlyOne(props.children)(Provider.value)
+  }
+  return { Provider, Consumer }
+}
+
+function useContext(context) {
+  return context.Provider.value
+}
 
 export default {
   createElement,
   Component,
-  PureComponent
+  PureComponent,
+  createRef,
+  createContext,
+  useContext
 }
 
 export {
   Component,
-  PureComponent
+  PureComponent,
+  createRef,
+  createContext,
+  useContext
 }
