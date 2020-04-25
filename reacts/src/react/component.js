@@ -189,7 +189,7 @@ function diff(parent, oldChildren, newChildren) {
     } else { // 如果新元素为Null，那么要卸载元素，并且执行生命周期
       const key = index.toString()
       const oldChild = oldChildrenMap[key]
-      if (oldChild && oldChild.instance.componentWillUnmount) {
+      if (oldChild && oldChild.instance && oldChild.instance.componentWillUnmount) {
         unstable_batchedUpdates(() => oldChild.instance.componentWillUnmount())
       }
     }

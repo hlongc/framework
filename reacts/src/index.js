@@ -78,7 +78,7 @@ class Child extends Component {
     console.log('Child render', this.state, this.context)
     return (
       <div>
-        { this.context.color }
+        { Math.random() > 0.5 ? this.context.color : null }
         <div>{this.props.count}</div>
         <GrandSon />
       </div>

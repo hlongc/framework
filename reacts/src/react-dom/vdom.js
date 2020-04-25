@@ -5,10 +5,14 @@ import { unstable_batchedUpdates } from './index'
 // 创建子元素节点
 function createChildren(parentContainer, parentVNode) {
   parentVNode.props.children.flat(Infinity).forEach((child, index) => {
-    const dom = createDOM(child) // 递归创建孩子节点
-    child._mountIndex = index // 此索引会在dom-diff时用到,标记它在父元素中子节点的位置
-    child.dom = dom // 虚拟节点和真实节点对应
-    parentContainer.appendChild(dom)
+    if (!child) {
+      parentContainer.appendChild(document.createTextNode(''))
+    } else {
+      const dom = createDOM(child) // 递归创建孩子节点
+      child._mountIndex = index // 此索引会在dom-diff时用到,标记它在父元素中子节点的位置
+      child.dom = dom // 虚拟节点和真实节点对应
+      parentContainer.appendChild(dom)
+    }
   })
 }
 
@@ -67,6 +71,7 @@ function createFunctionComponentDOM(vnode) {
 // 通过虚拟dom创建真实节点
 export function createDOM(vnode) {
   vnode = onlyOne(vnode)
+  if (!vnode) return document.createTextNode('')
   const { $$typeof, type } = vnode
   let dom = null
   if (!$$typeof) { // ReactDOM.render('hhh', document.getElementById('root'))，这种情况就没有$$typeof
