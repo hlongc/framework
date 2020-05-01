@@ -9,11 +9,7 @@
 
 <script>
 export default {
-  name: 'setting',
-  data () {
-    return {
-    }
-  }
+  name: 'setting'
 }
 </script>
 <style>

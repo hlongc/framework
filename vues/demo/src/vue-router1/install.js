@@ -1,20 +1,16 @@
 import RouterView from './components/router-view'
 import RouterLink from './components/router-link'
-let Vue
 
-export default function install(_Vue) {
-  Vue = _Vue
+export default function(Vue) {
   Vue.mixin({
     beforeCreate () {
-      if (this.$options.router) {
-        this._routerRoot = this // 保留router根节点
+      if (this.$options.router) { // 说明当前是根组件
+        this._routerRoot = this
         this._router = this.$options.router
-        // 初始化路由
-        this._router.init(this)
-        // 把当前匹配到的路由定义到this上面，并且是响应式的，只要一变化，页面就会重新渲染
+        this._router.init(this) // 传入当前跟实例
+        // 将当前匹配到的路由定义到this上，当路由发生变化时，由于是响应的，所以会刷新视图
         Vue.util.defineReactive(this, '_route', this._router.history.current)
       } else {
-        // 子节点通过父节点拿到router根节点
         this._routerRoot = this.$parent && this.$parent._routerRoot
       }
     }

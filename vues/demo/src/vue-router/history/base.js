@@ -1,52 +1,53 @@
-export function createRoute(record, location = {}) {
-  const res = []
-  if (record) {
-    while (record) { // 递归添加，如果有父元素，那么把父元素也添加进去
-      res.unshift(record) // 此处只能添加在最前面，因为在router-view组件渲染的时候，是从父往子寻找
-      record = record.parent
-    }
-  }
-  return { ...location, matched: res }
-}
-// 进行迭代，执行完每个钩子函数
-function runQueue(queue, iterator, callback) {
+
+import { createRoute } from '../create-matcher.js'
+
+function runQueue(queue, iterator, out) {
   function next(index) {
-    if (index === queue.length) return callback()
-    const beforeEach = queue[index]
-    iterator(beforeEach, () => next(++index))
+    if (index === queue.length) return out()
+    iterator(queue[index], () => next(++index))
   }
   next(0)
 }
-
-export default class History {
+class History {
   constructor(router) {
     this.router = router
-    // 当前路径匹配的结果 { path, matcher }
-    this.current = createRoute(null, { path: '/' })
+    const hash = window.location.hash ? window.location.hash.slice(1) : '/'
+    this.current = createRoute(null, { path: hash })
+    this.beforeEachs = []
   }
+
   transitionTo(path, callback) {
+    // 用当前路径去匹配结果
     const r = this.router.match(path)
-    // 路由不改变就不跳转
-    if (path === this.current.path && r.matched.length === this.current.matched.length) {
+    // 路径相同就不跳转了
+    if (r.path === this.current.path && r.matched.length === this.current.matched.length) {
       return
     }
     callback && callback()
-    const queue = this.router.beforeEachList
-    const iterator = (beforeEach, next) => {
-      // 给beforeEach传入三个参数 from, to, next
-      beforeEach(this.current, r, next)
+
+    const iterator = (hook, next) => {
+      hook(this.current, r, next)
     }
-    // 更新路由之前先执行beforeEach钩子函数
-    runQueue(queue, iterator, () => {
-      this.updateRoute(r)
+    runQueue(this.beforeEachs, iterator, () => {
+      this.update(r)
     })
   }
-  // 更新路由
-  updateRoute(r) {
+
+  update(r) {
     this.current = r
-    this.cb && this.cb(r) // 路由变化时去更新_route刷新视图
+    this.cb && this.cb(r)
   }
+
+  setupListener() {
+    // 监听hash变化，变化了就跳到对应的页面
+    window.addEventListener('hashchange',  () => {
+      this.transitionTo(window.location.hash.slice(1))
+    })
+  }
+
   listen(cb) {
     this.cb = cb
   }
 }
+
+export default History

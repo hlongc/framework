@@ -5,7 +5,6 @@
         <MyMenu :data="data" />
       </el-aside>
       <el-main>
-        {{ _routerRoot._route.path }}
         <router-view />
       </el-main>
     </el-container>
@@ -38,7 +37,7 @@ export default {
       ]
     }
   }
-}
+ }
 </script>
 
 <style lang="less" scoped>

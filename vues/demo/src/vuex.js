@@ -29,19 +29,19 @@ class ModuleCollection {
       state: parentModule.state,
       children: {}
     }
-    parentModule.rowModule = rowModule // 记录下格式化后的数据
+    parentModule.rowModule = rowModule // 记录下格式化后的数据,在动态安装模块时会用到
 
     if (path.length === 0) {
       this.root = rowModule
     } else {
-      // 找到父级元素
+      // 找到父级元素 [a, b, c]
       const parent = path.slice(0, -1).reduce((memo, moduleName) => {
         return memo.children[moduleName]
       }, this.root)
       // 给父级元素设置儿子
       parent.children[path[path.length - 1]] = rowModule
     }
-    if (parentModule.modules) {
+    if (parentModule.modules) { // 递归安装子模块
       forEach(parentModule.modules, (moduleName, module) => {
         this.register(path.concat(moduleName), module)
       })
@@ -56,6 +56,7 @@ function getState(store, path) {
   }, store.state)
 }
 
+// installModule(this, this.state, [], this.modules.root)
 function installModule(store, rootState, path, rowModule) {
   let root = cloneDeep(store.modules.root)
   // 获取当前模块的命名空间
@@ -90,7 +91,8 @@ function installModule(store, rootState, path, rowModule) {
       const mutationArray = store.mutations[namespaced + mutationName] || (store.mutations[namespaced + mutationName] = [])
       mutationArray.push((payload) => {
         value.call(store, getState(store, path), payload)
-        // mutation触发时执行所有订阅好的方法
+        // mutation触发时执行所有订阅好的同名方法
+        // 执行插件
         store.plugins.forEach(fn => fn({ mutation: namespaced + mutationName, payload }, store.state))
       })
     })
@@ -124,8 +126,8 @@ class Store {
     this.actions = {}
     this.plugins = []
 
-    this.modules = new ModuleCollection(options)
-    installModule(this, this.state, [], this.modules.root)
+    this.modules = new ModuleCollection(options) // 模块收集，进行递归格式化处理
+    installModule(this, this.state, [], this.modules.root) // 安装模块
 
     // 执行每个插件
     if (Array.isArray(options.plugins)) {
@@ -165,11 +167,11 @@ export function mapState(states) {
   const obj = {}
   if (Array.isArray(states)) {
     states.forEach(stateName => {
-    obj[stateName] = function() {
-      return this.$store.state[stateName]
-    }
+      obj[stateName] = function() {
+        return this.$store.state[stateName]
+      }
   })
-  } else if (states.toString().slice(-7, -1) === 'Object') {
+  } else if (states.toString().slice(-7, -1) === 'Object') { // 对象的方式可以允许重命名
     Object.entries(states).forEach(([rename, realName]) => {
       obj[rename] = function() {
         // 处理重命名深度取值的情况 z: 'a.c.z',先取a => c => z
@@ -186,10 +188,10 @@ export function mapGetters(getters) {
   const obj = {}
   if (Array.isArray(getters)) {
     getters.forEach(getterName => {
-    obj[getterName] = function() {
-      return this.$store.getters[getterName]
-    }
-  })
+      obj[getterName] = function() {
+        return this.$store.getters[getterName]
+      }
+    })
   } else {
     consol.error(`mapGetter函数参数只能为数组`)
   }
@@ -218,10 +220,10 @@ export function mapActions(actions) {
   const obj = {}
   if (Array.isArray(actions)) {
     actions.forEach(actionName => {
-    obj[actionName] = function(...payload) {
-      this.$store.dispatch(actionName, ...payload)
-    }
-  })
+      obj[actionName] = function(...payload) {
+        this.$store.dispatch(actionName, ...payload)
+      }
+    })
   } else if (actions.toString().slice(-7, -1) === 'Object') {
     Object.entries(actions).forEach(([rename, realName]) => {
       obj[rename] = function(...payload) {

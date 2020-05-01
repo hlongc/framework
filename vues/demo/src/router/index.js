@@ -3,6 +3,10 @@ import Router from '@/vue-router'
 import Home from '@/components/HelloWorld'
 import NotFound from '@/components/404'
 import Example from '@/components/Example'
+import Drag from '@/components/Drag.vue'
+import Setting from '@/components/setting.vue'
+import User from '@/components/UserMange.vue'
+import Message from '@/components/MesMange.vue'
 
 Vue.use(Router)
 
@@ -18,19 +22,19 @@ const routes = [
   },
   {
     path: '/drag',
-    component: () => import('@/components/Drag.vue')
+    component: Drag
   },
   {
     path: '/setting',
-    component: () => import('@/components/setting.vue'),
+    component: Setting,
     meta: { title: '系统设置' },
     children: [{
       path: 'user',
-      component: () => import('@/components/UserMange.vue'),
+      component: User,
       meta: { title: '用户管理' }
     }, {
       path: 'message',
-      component: () => import('@/components/MesMange.vue'),
+      component: Message,
       meta: { title: '短信管理' }
     }]
   },
@@ -58,7 +62,7 @@ router.beforeEach((to, from, next) => {
 })
 
 router.beforeEach((to, from, next) => {
-  console.log('第er个beforeEach')
+  console.log('第二个beforeEach')
   next()
 })
 

@@ -57,7 +57,7 @@ class Promise {
       if (this.status === PENDING) {
         this.status = FULFILLED
         this.value = value
-        this.rejectCallbackList.forEach(fn => fn())
+        this.resolveCallbackList.forEach(fn => fn())
       }
     }
 
