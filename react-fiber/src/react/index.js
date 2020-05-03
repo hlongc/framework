@@ -1,4 +1,6 @@
 import { TEXT } from './constant'
+import { Update } from './updateQueue'
+import { schedule } from '../react-dom/schedule';
 function createElement(type, props, ...children) {
   delete props.__self
   delete props.__source
@@ -12,6 +14,20 @@ function createElement(type, props, ...children) {
   return { type, props: { ...props, children } }
 }
 
+class Component {
+  constructor(props) {
+    this.props = props
+  }
+  setState(partial) {
+    this.internalFiber.updateQueue.enqueue(new Update(partial))
+    // 添加完成以后执行调度
+    schedule()
+  }
+}
+
+Component.prototype.isReactComponent = {} // 标记当前是类组件
+
 export default {
-  createElement
+  createElement,
+  Component
 }

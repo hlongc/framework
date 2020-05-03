@@ -13,7 +13,7 @@ export function patchProps(dom, oldProps, newProps) {
   // 删除新的没有的属性
   for (const key in oldProps) {
     if (key === 'children') continue
-    if (!newProps.hasOwnproperty(key)) {
+    if (!newProps.hasOwnProperty(key)) {
       dom.removeAttribute(key)
     }
   }

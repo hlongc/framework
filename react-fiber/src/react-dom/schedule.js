@@ -1,24 +1,61 @@
-import { TAG_ROOT, TAG_HOST, TAG_TEXT, TEXT, PLACEMENT } from '../react/constant'
+import { TAG_ROOT, TAG_HOST, TAG_TEXT, TEXT, PLACEMENT, DELETE, UPDATE, CLASS_COMPONENT, FUNCTION_COMPONENT } from '../react/constant'
 import { patchProps } from './utils'
+import { UpdateQueue } from '../react/updateQueue';
 
 let workInProgressRoot = null // 根fiber
 let nextUnitOfWork = null // 当前正在执行的fiber
+let currentRoot = null // 之前渲染完成的fiber树
+const deletions = [] //保存需要删除的fiber
 // 进行调度
 export function schedule(rootFiber) {
-  workInProgressRoot = rootFiber
+  // 双缓冲，减少对象的创建，复用对象
+  if (currentRoot && currentRoot.alternate) { // 偶数次更新 
+    workInProgressRoot = currentRoot.alternate
+    workInProgressRoot.alternate = currentRoot
+    // 可能调度的时候没有传入rootFiber
+    if (rootFiber) workInProgressRoot.props = rootFiber.props // props需要是当前的最新值
+  } else if (currentRoot) { // 奇数次更新
+    if (rootFiber) {
+      rootFiber.alternate = currentRoot // 让workInProgress通过alternate关联起来
+      workInProgressRoot = rootFiber
+    } else {
+      workInProgressRoot = {
+        ...currentRoot,
+        alternate: currentRoot
+      }
+    }
+  } else { // 第一次渲染
+    workInProgressRoot = rootFiber
+  }
+  workInProgressRoot.firstEffect = workInProgressRoot.lastEffect = workInProgressRoot.nextEffect = null
   nextUnitOfWork = workInProgressRoot
 }
 
 // 开始处理fiber, beginWork主要是创建真实节点
 function beginWork(fiber) {
   if (!fiber) return
-  if (fiber.tag === TAG_ROOT) { // 对根节点进行处理,同时会递归创建子孙的fiber
-    updateHoot(fiber)
-  } else if (fiber.tag === TAG_TEXT) { // 处理文本节点
+  const tag = fiber.tag
+  if (tag === TAG_ROOT) { // 对根节点进行处理,同时会递归创建子孙的fiber
+    updateRoot(fiber)
+  } else if (tag === TAG_TEXT) { // 处理文本节点
     updateTextHost(fiber)
-  } else if (fiber.tag === TAG_HOST) { // 处理原生html元素
+  } else if (tag === TAG_HOST) { // 处理原生html元素
     updateHostComponent(fiber)
+  } else if (tag === CLASS_COMPONENT) { // 处理类组件
+    updateClassComponent(fiber)
   }
+}
+
+function updateClassComponent(fiber) {
+  if (!fiber.stateNode) {
+    fiber.stateNode = new fiber.type(fiber.props)
+    fiber.stateNode.internalFiber = fiber // 让fiber和实例互相引用
+    fiber.updateQueue = new UpdateQueue() // 初始化updateQueue
+  }
+  // 更新state的值
+  fiber.stateNode.state = fiber.updateQueue.forceUpdate(fiber.stateNode.state)
+  const newChild = fiber.stateNode.render()
+  reconcilerChildren(fiber, [newChild])
 }
 
 function updateHostComponent(fiber) {
@@ -45,7 +82,7 @@ function updateTextHost(fiber) {
   }
 }
 
-function updateHoot(fiber) {
+function updateRoot(fiber) {
   const children = fiber.props.children // 因为是根节点，所以对子节点进行渲染
   reconcilerChildren(fiber, children)
 }
@@ -54,31 +91,86 @@ function updateHoot(fiber) {
 function reconcilerChildren(currentFiber, children) {
   let childIndex = 0
   let previousFiber = null
-  while(childIndex < children.length) {
+  let oldFiber = currentFiber.alternate && currentFiber.alternate.child
+  if (oldFiber) oldFiber.firstEffect = oldFiber.nextEffect = oldFiber.lastEffect = null
+  // 只要有一个还没完成那就继续
+  while(childIndex < children.length || oldFiber) {
     const child = children[childIndex]
     let tag
-    if (child && child.type === TEXT) { // 文本节点
+    let fiberNode
+    if (child && typeof child.type === 'function' && child.type.prototype.isReactComponent) {
+      tag = CLASS_COMPONENT
+    } else if (child && typeof child.type === 'function') {
+      tag = FUNCTION_COMPONENT
+    } else if (child && child.type === TEXT) { // 文本节点
       tag = TAG_TEXT
     } else if (child && typeof child.type === 'string') { // 原生html标签
       tag = TAG_HOST
     }
-    const fiberNode = {
-      tag, // 标记当前是什么类型的fiber
-      type: child.type, // 当前虚拟节点的类型
-      props: child.props, // 属性
-      return: currentFiber, // 当前fiber的父节点
-      child: null, // 当前fiber的第一个子节点
-      sibling: null, // 当前fiber的下一个兄弟节点
-      stateNode: null, // 当前fiber的真实dom元素
-      effectTag: PLACEMENT, // 当前副作用的类型
-      firstEffect: null, // 第一个更新操作
-      nextEffect: null, // 下一个更新
-      lastEffect: null // 最后一个更新
-    }
-    if (childIndex === 0) {
-      currentFiber.child = fiberNode // child指向第一个子节点
+    const isSame = oldFiber && child && oldFiber.type === child.type
+    if (isSame) {
+      if (false && oldFiber.alternate) { // 如果上上次有fiber的话，直接复用，修改属性即可
+        fiberNode = oldFiber.alternate
+        fiberNode.props = child.props
+        fiberNode.alternate = oldFiber
+        fiberNode.effectTag = UPDATE
+        fiberNode.child = null // 当前fiber的第一个子节点
+        fiberNode.sibling = null // 当前fiber的下一个兄弟节点
+        fiberNode.firstEffect = null // 第一个更新操作
+        fiberNode.nextEffect = null // 下一个更新
+        fiberNode.lastEffect = null // 最后一个更新
+      } else {
+        // 类型相同直接复用
+        fiberNode = {
+          tag: oldFiber.tag, // 标记当前是什么类型的fiber
+          type: oldFiber.type, // 当前虚拟节点的类型
+          props: child.props, // 属性要拿最新的属性
+          return: currentFiber, // 当前fiber的父节点
+          child: null, // 当前fiber的第一个子节点
+          sibling: null, // 当前fiber的下一个兄弟节点
+          stateNode: oldFiber.stateNode, // 复用之前的实例
+          updateQueue: oldFiber.updateQueue || new UpdateQueue(),
+          alternate: oldFiber, // 指向之前的老fiber
+          effectTag: UPDATE, // 当前副作用的类型
+          firstEffect: null, // 第一个更新操作
+          nextEffect: null, // 下一个更新
+          lastEffect: null // 最后一个更新
+        }
+      }
     } else {
-      previousFiber.sibling = fiberNode // 上一个fiber的sibling指向当前的元素
+      if (child) {
+        fiberNode = {
+          tag, // 标记当前是什么类型的fiber
+          type: child.type, // 当前虚拟节点的类型
+          props: child.props, // 属性
+          return: currentFiber, // 当前fiber的父节点
+          child: null, // 当前fiber的第一个子节点
+          sibling: null, // 当前fiber的下一个兄弟节点
+          stateNode: null, // 当前fiber的真实dom元素
+          updateQueue: new UpdateQueue(),
+          effectTag: PLACEMENT, // 当前副作用的类型
+          firstEffect: null, // 第一个更新操作
+          nextEffect: null, // 下一个更新
+          lastEffect: null // 最后一个更新
+        }
+      }
+      if (oldFiber) {
+        // 类型不同的话，要删除之前的元素
+        oldFiber.effectTag = DELETE
+        deletions.push(oldFiber)
+      }
+    }
+    // 如果当前有新fiber,才可以修改指向，有可能老的长度比新的长，所以会出现为undefined的情况
+    if (fiberNode) {
+      if (childIndex === 0) {
+        currentFiber.child = fiberNode // child指向第一个子节点
+      } else {
+        previousFiber.sibling = fiberNode // 上一个fiber的sibling指向当前的元素
+      }
+    }
+    // 如果当前oldFiber存在就继续取它的下一个兄弟节点
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling // 移动到下一个元素,同时移动
     }
     previousFiber = fiberNode
     childIndex++
@@ -135,20 +227,47 @@ function performUnitOfWord(fiber) {
 
 // 将complete收集到的effect进行更新
 function commitRoot() {
+  // 更新之前先删除需要删除的元素
+  deletions.forEach(fiber => commitFiber(fiber))
   let currentFiber = workInProgressRoot.firstEffect
   while(currentFiber) {
     commitFiber(currentFiber)
     currentFiber = currentFiber.nextEffect
   }
+  deletions.length = 0 // 清空删除列表
+  currentRoot = workInProgressRoot // 赋给current,下次更新的时候可以用到
   workInProgressRoot = null
 }
 // 提交每一个副作用
 function commitFiber(currentFiber) {
   if (!currentFiber) return
-  const returnFiber = currentFiber.return // 拿到父节点
+  const effectTag = currentFiber.effectTag // 当前副作用的类型
+  let returnFiber = currentFiber.return // 拿到父节点
+  // 找到真正子元素dom节点
+  while(currentFiber.tag !== TAG_TEXT && currentFiber.tag !== TAG_HOST) {
+    currentFiber = currentFiber.child
+  }
+  let currentDom = currentFiber.stateNode // 当前fiber对应的实例
+
+  // 类组件就要继续往上面找到真正的dom节点
+  while(returnFiber.tag !== TAG_ROOT && returnFiber.tag !== TAG_HOST) {
+    returnFiber = returnFiber.return
+  }
+  let returnDom = returnFiber.stateNode // 父节点的实例
+
   if (returnFiber) {
-    if (currentFiber.effectTag === PLACEMENT && currentFiber.stateNode) { // 新增
-      returnFiber.stateNode.appendChild(currentFiber.stateNode)
+    if (effectTag === PLACEMENT && currentDom) { // 新增
+      returnDom.appendChild(currentDom)
+    } else if (effectTag === DELETE) {
+      returnDom.removeChild(currentDom)
+    } else if (effectTag === UPDATE) {
+      if (currentFiber.type === TEXT) { // 文本节点单独处理
+        if (currentFiber.props.text !== currentFiber.alternate.props.text) {
+          currentDom.textContent = currentFiber.props.text
+        }
+      } else { // 不是文本节点的话，直接打补丁
+        patchProps(currentDom, currentFiber.alternate.props, currentFiber.props)
+      }
     }
     currentFiber.effectTag = null
   }
