@@ -1,6 +1,6 @@
 import { TEXT } from './constant'
 import { Update } from './updateQueue'
-import { schedule } from '../react-dom/schedule';
+import { schedule, useReducer } from '../react-dom/schedule';
 function createElement(type, props, ...children) {
   delete props.__self
   delete props.__source
@@ -29,5 +29,6 @@ Component.prototype.isReactComponent = {} // 标记当前是类组件
 
 export default {
   createElement,
-  Component
+  Component,
+  useReducer
 }

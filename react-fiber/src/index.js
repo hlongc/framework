@@ -21,7 +21,33 @@ class Counter extends React.Component {
   }
 }
 
-ReactDOM.render(<Counter name="计数器" />, document.getElementById('root'))
+const ADD = 'ADD'
+const MINUS = 'MINUS'
+
+function reducer(state, action) {
+  switch(action.type) {
+    case ADD:
+      return { ...state, count: state.count + 1 }
+    case MINUS:
+      return { ...state, count: state.count - 1 }
+    default:
+      return state
+  }
+}
+
+function HookCounter(props) {
+  const [countState, dispatch] = React.useReducer(reducer, { count: 0 })
+  return (
+    <div>
+      <p>{props.name}</p>
+      { countState.count }
+      <button onClick={() => dispatch({ type: ADD })}>+</button>
+      <button onClick={() => dispatch({ type: MINUS })}>-</button>
+    </div>
+  )
+}
+
+ReactDOM.render(<HookCounter name="计数器" />, document.getElementById('root'))
 
 // function handleClick(e) {
 //   e.persist()

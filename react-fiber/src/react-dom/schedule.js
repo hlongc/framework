@@ -1,11 +1,13 @@
 import { TAG_ROOT, TAG_HOST, TAG_TEXT, TEXT, PLACEMENT, DELETE, UPDATE, CLASS_COMPONENT, FUNCTION_COMPONENT } from '../react/constant'
 import { patchProps } from './utils'
-import { UpdateQueue } from '../react/updateQueue';
+import { UpdateQueue, Update } from '../react/updateQueue';
 
 let workInProgressRoot = null // 根fiber
 let nextUnitOfWork = null // 当前正在执行的fiber
 let currentRoot = null // 之前渲染完成的fiber树
 const deletions = [] //保存需要删除的fiber
+let workInProgressFiber // 记录当前正在执行的fiber
+let hookIndex = 0 // hook索引
 // 进行调度
 export function schedule(rootFiber) {
   // 双缓冲，减少对象的创建，复用对象
@@ -43,7 +45,17 @@ function beginWork(fiber) {
     updateHostComponent(fiber)
   } else if (tag === CLASS_COMPONENT) { // 处理类组件
     updateClassComponent(fiber)
+  } else if (tag === FUNCTION_COMPONENT) { // 处理函数组件
+    updateFunctionComponent(fiber)
   }
+}
+
+function updateFunctionComponent(fiber) {
+  workInProgressFiber = fiber
+  fiber.hooks = []
+  hookIndex = 0
+  const newChild = fiber.type(fiber.props)
+  reconcilerChildren(fiber, [newChild])
 }
 
 function updateClassComponent(fiber) {
@@ -244,19 +256,28 @@ function commitFiber(currentFiber) {
   const effectTag = currentFiber.effectTag // 当前副作用的类型
   let returnFiber = currentFiber.return // 拿到父节点
   // 找到真正子元素dom节点
-  while(currentFiber.tag !== TAG_TEXT && currentFiber.tag !== TAG_HOST) {
-    currentFiber = currentFiber.child
-  }
+  // while(currentFiber.tag !== TAG_TEXT && currentFiber.tag !== TAG_HOST) {
+  //   currentFiber = currentFiber.child
+  // }
   let currentDom = currentFiber.stateNode // 当前fiber对应的实例
 
   // 类组件就要继续往上面找到真正的dom节点
-  while(returnFiber.tag !== TAG_ROOT && returnFiber.tag !== TAG_HOST) {
-    returnFiber = returnFiber.return
-  }
+  // while(returnFiber.tag !== TAG_ROOT && returnFiber.tag !== TAG_HOST) {
+  //   returnFiber = returnFiber.return
+  // }
   let returnDom = returnFiber.stateNode // 父节点的实例
-
   if (returnFiber) {
     if (effectTag === PLACEMENT && currentDom) { // 新增
+      while(currentFiber.tag !== TAG_TEXT && currentFiber.tag !== TAG_HOST) {
+        currentFiber = currentFiber.child
+      }
+      let currentDom = currentFiber.stateNode // 当前fiber对应的实例
+    
+      // 类组件就要继续往上面找到真正的dom节点
+      while(returnFiber.tag !== TAG_ROOT && returnFiber.tag !== TAG_HOST) {
+        returnFiber = returnFiber.return
+      }
+      let returnDom = returnFiber.stateNode // 父节点的实例
       returnDom.appendChild(currentDom)
     } else if (effectTag === DELETE) {
       returnDom.removeChild(currentDom)
@@ -288,6 +309,26 @@ function workLoop(deadline) {
     commitRoot()
   }
   requestIdleCallback(workLoop, { timeout: 500 })
+}
+
+export function useReducer(reducer, initialState) {
+  let oldHook = workInProgressFiber.alternate && workInProgressFiber.alternate.hooks && workInProgressFiber.alternate[hookIndex]
+  if (oldHook) { // 如果能复用，那就更新状态
+    oldHook.state = oldHook.updateQueue.forceUpdate(oldHook.state)
+  } else { // 第一次渲染的时候,创建Hook
+    oldHook = {
+      state: initialState,
+      updateQueue: new UpdateQueue()
+    }
+  }
+
+  const dispatch = action => {
+    const payload = reducer ? reducer(oldHook.state, action) : action
+    oldHook.updateQueue.enqueue(new Update(payload))
+    schedule()
+  }
+  workInProgressFiber.hooks[hookIndex] = oldHook
+  return [oldHook.state, dispatch]
 }
 
 // 让浏览器在空闲的时候执行这个任务,最迟500毫秒以后执行
