@@ -179,12 +179,12 @@ function reconcilerChildren(currentFiber, children) {
       } else {
         previousFiber.sibling = fiberNode // 上一个fiber的sibling指向当前的元素
       }
+      previousFiber = fiberNode
     }
     // 如果当前oldFiber存在就继续取它的下一个兄弟节点
     if (oldFiber) {
       oldFiber = oldFiber.sibling // 移动到下一个元素,同时移动
     }
-    previousFiber = fiberNode
     childIndex++
   }
 }
@@ -197,18 +197,12 @@ function completeUnitOfWork(currentFiber) {
     if (!returnFiber.firstEffect) { // 父元素不存在第一个副作用元素时，将自己的第一个挂载上去
       returnFiber.firstEffect = currentFiber.firstEffect
     }
-    // if (currentFiber.lastEffect) {
-    //   if (returnFiber.lastEffect) { // 如果有了最后一个，那么把最后一个指向当前的第一个副作用节点,这样才能保证能把子元素的所有副作用挂载上去
-    //     returnFiber.lastEffect.nextEffect = currentFiber.firstEffect
-    //   }
-    //   returnFiber.lastEffect = currentFiber.lastEffect
-    // }
-
-    if (returnFiber.lastEffect) { // 如果有了最后一个，那么把最后一个指向当前的第一个副作用节点,这样才能保证能把子元素的所有副作用挂载上去
-      returnFiber.lastEffect.nextEffect = currentFiber.firstEffect
+    if (currentFiber.lastEffect) { // 当前有最后一个副作用才能修改，不然可能会变成null导致链表断开
+      if (returnFiber.lastEffect) { // 如果有了最后一个，那么把最后一个指向当前的第一个副作用节点,这样才能保证能把子元素的所有副作用挂载上去
+        returnFiber.lastEffect.nextEffect = currentFiber.firstEffect
+      }
+      returnFiber.lastEffect = currentFiber.lastEffect
     }
-    returnFiber.lastEffect = currentFiber.lastEffect
-
 
     const effectTag = currentFiber.effectTag // 取出当前fiber的副作用操作
     if (effectTag) { // 存在副作用操作就更新父节点的链表
@@ -254,30 +248,20 @@ function commitRoot() {
 function commitFiber(currentFiber) {
   if (!currentFiber) return
   const effectTag = currentFiber.effectTag // 当前副作用的类型
-  let returnFiber = currentFiber.return // 拿到父节点
   // 找到真正子元素dom节点
-  // while(currentFiber.tag !== TAG_TEXT && currentFiber.tag !== TAG_HOST) {
-  //   currentFiber = currentFiber.child
-  // }
+  while(currentFiber.tag !== TAG_TEXT && currentFiber.tag !== TAG_HOST) {
+    currentFiber = currentFiber.child
+  }
   let currentDom = currentFiber.stateNode // 当前fiber对应的实例
 
+  let returnFiber = currentFiber.return // 拿到父节点
   // 类组件就要继续往上面找到真正的dom节点
-  // while(returnFiber.tag !== TAG_ROOT && returnFiber.tag !== TAG_HOST) {
-  //   returnFiber = returnFiber.return
-  // }
+  while(returnFiber.tag !== TAG_ROOT && returnFiber.tag !== TAG_HOST && currentFiber.tag !== TAG_TEXT) {
+    returnFiber = returnFiber.return
+  }
   let returnDom = returnFiber.stateNode // 父节点的实例
   if (returnFiber) {
     if (effectTag === PLACEMENT && currentDom) { // 新增
-      while(currentFiber.tag !== TAG_TEXT && currentFiber.tag !== TAG_HOST) {
-        currentFiber = currentFiber.child
-      }
-      let currentDom = currentFiber.stateNode // 当前fiber对应的实例
-    
-      // 类组件就要继续往上面找到真正的dom节点
-      while(returnFiber.tag !== TAG_ROOT && returnFiber.tag !== TAG_HOST) {
-        returnFiber = returnFiber.return
-      }
-      let returnDom = returnFiber.stateNode // 父节点的实例
       returnDom.appendChild(currentDom)
     } else if (effectTag === DELETE) {
       returnDom.removeChild(currentDom)
@@ -312,7 +296,7 @@ function workLoop(deadline) {
 }
 
 export function useReducer(reducer, initialState) {
-  let oldHook = workInProgressFiber.alternate && workInProgressFiber.alternate.hooks && workInProgressFiber.alternate[hookIndex]
+  let oldHook = workInProgressFiber.alternate && workInProgressFiber.alternate.hooks && workInProgressFiber.alternate.hooks[hookIndex]
   if (oldHook) { // 如果能复用，那就更新状态
     oldHook.state = oldHook.updateQueue.forceUpdate(oldHook.state)
   } else { // 第一次渲染的时候,创建Hook
@@ -327,7 +311,7 @@ export function useReducer(reducer, initialState) {
     oldHook.updateQueue.enqueue(new Update(payload))
     schedule()
   }
-  workInProgressFiber.hooks[hookIndex] = oldHook
+  workInProgressFiber.hooks[hookIndex++] = oldHook
   return [oldHook.state, dispatch]
 }
 
