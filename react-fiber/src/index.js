@@ -37,12 +37,15 @@ function reducer(state, action) {
 
 function HookCounter(props) {
   const [countState, dispatch] = React.useReducer(reducer, { count: 0 })
+  const [num, setNumber] = React.useState(0)
   return (
     <div>
       <p>{props.name}</p>
       { countState.count }
       <button onClick={() => dispatch({ type: ADD })}>+</button>
       <button onClick={() => dispatch({ type: MINUS })}>-</button>
+      <p>数字: {num}</p>
+      <button onClick={() => setNumber(num + 1)}>num+</button>
     </div>
   )
 }

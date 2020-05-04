@@ -315,5 +315,9 @@ export function useReducer(reducer, initialState) {
   return [oldHook.state, dispatch]
 }
 
+export function useState(initialState) {
+  return useReducer(null, initialState)
+}
+
 // 让浏览器在空闲的时候执行这个任务,最迟500毫秒以后执行
 requestIdleCallback(workLoop, { timeout: 500 })

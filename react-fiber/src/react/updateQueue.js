@@ -22,8 +22,11 @@ export class UpdateQueue {
     while (currentUpdate) {
       // 获取新的状态
       const partialState = typeof currentUpdate.payload === 'function' ? currentUpdate.payload(state) : currentUpdate.payload
-      // 进行合并
-      state = { ...state, ...partialState }
+      if (typeof state === 'object') { // 如果是对象就进行合并
+        state = { ...state, ...partialState }
+      } else { // 使用useState传进来的就不一定是对象
+        state = partialState
+      }
       currentUpdate = currentUpdate.nextUpdate
     }
     // 执行完以后清空
