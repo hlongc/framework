@@ -54,7 +54,9 @@ function createClassComponentDOM(vnode) {
   }
   vnode.instance = instance // 记录当前虚拟dom的实例
   instance.renderElement = renderElement
-  renderElement.dom = dom // 当前实例对应的真实dom元素
+  if (Object.prototype.toString.call(vnode).slice(8, -1) !== 'Object') {
+    renderElement.dom = dom // 当前实例对应的真实dom元素
+  }
   return dom
 }
 
@@ -71,7 +73,11 @@ function createFunctionComponentDOM(vnode) {
 // 通过虚拟dom创建真实节点
 export function createDOM(vnode) {
   vnode = onlyOne(vnode)
-  if (!vnode) return document.createTextNode('')
+  // 如果不是对象直接渲染为文本节点
+  if (Object.prototype.toString.call(vnode).slice(8, -1) !== 'Object') {
+    const textContent = typeof vnode === 'number' ? vnode : ''
+    return document.createTextNode(textContent)
+  }
   const { $$typeof, type } = vnode
   let dom = null
   if (!$$typeof) { // ReactDOM.render('hhh', document.getElementById('root'))，这种情况就没有$$typeof

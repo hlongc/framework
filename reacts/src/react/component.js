@@ -80,7 +80,9 @@ function shouldUpdate(componentInstance, nextProps, nextState) {
 function compareElement(oldVNode, newVNode) {
   oldVNode = onlyOne(oldVNode)
   newVNode = onlyOne(newVNode)
-
+  if (!oldVNode && !newVNode) { // 如果老的虚拟节点不存在
+    return null
+  }
   let oldDom = oldVNode.dom
   let currentNode = oldVNode
   if (newVNode === null) { // 新节点被删除了，则移除老节点
@@ -143,7 +145,7 @@ function patch() {
 }
 
 function insertNode(parent, dom, index) {
-  const target = parent.children[index]
+  const target = parent.childNodes[index]
   // 如果当前位置有元素那么久插入到它前面，没有直接append
   target ? parent.insertBefore(dom, target) : parent.appendChild(dom)
 }
