@@ -103,9 +103,16 @@ class Promise {
       })
     })
   }
+  static race(promises) {
+    return new Promise((resolve, reject) => {
+      if (promises.length === 0) resolve()
+      promises.forEach(p => p.then(resolve, reject))
+    })
+  }
   then (onFulfilled, onRejected) {
     onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value
     onRejected = typeof onRejected === 'function' ? onRejected : err => { throw err }
+    // 为了实现链式调用，每次都返回一个新的promise
     const promise2 = new Promise((resolve, reject) => {
       if (this.state === FULFILLED) {
         setTimeout(() => {
@@ -127,6 +134,8 @@ class Promise {
           }
         }, 0)
       }
+      // 有可能在executor中写出setTimeout(() => { resolve('xx') }, 1000)的代码
+      // 此时状态还是pending,那么就将两个函数存起来，等到resolve或者reject的时候再调用
       if (this.state === PENDING) {
         this.resolveCallbakList.push(() => {
           setTimeout(() => {
@@ -155,6 +164,12 @@ class Promise {
   catch (errCallback) {
     return this.then(null, errCallback)
   }
+  finally(callback) {
+    return this.then(
+      r => Promise.resolve(callback()).then(() => r),
+      e => Promise.resolve(callback()).then(() => { throw e }),
+    )
+  }
 }
 
 Promise.defer = Promise.deferred = function () {
@@ -166,4 +181,15 @@ Promise.defer = Promise.deferred = function () {
   return dfd
 }
 
+Promise.resolve(1).finally(() => {
+  console.log('finally')
+}).then(r => {
+  console.log(r)
+})
+
+Promise.race([1, 2, Promise.resolve('嘻嘻')]).then(res => {
+  console.log(res)
+})
+
 export default Promise
+

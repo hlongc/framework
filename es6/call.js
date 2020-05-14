@@ -1,4 +1,5 @@
-Function.prototype.call = function(obj, ...args) {
+// call的性能比apply更好，apply基于call来实现的
+Function.prototype.apply = function(obj, args) {
   let context = obj
   if (!obj) context = global || window
   const type = typeof obj
@@ -9,8 +10,8 @@ Function.prototype.call = function(obj, ...args) {
   delete context[fn]
   return res
 }
-// call的性能比apply更好，apply基于call来实现的
-Function.prototype.apply = function(obj, args) {
+
+Function.prototype.call = function(obj, ...args) {
   let context = obj
   if (!obj) context = global || window
   const type = typeof obj
@@ -33,3 +34,5 @@ a.call(obj, 24)
 function foo() { console.log('foo') }
 function bar() { console.log('bar') }
 foo.call.call.call(bar) // 相当于调用call.call(bar) => bar.call() => bar()
+// foo.apply.apply.apply(bar)
+foo.call(bar)
