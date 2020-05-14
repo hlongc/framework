@@ -1,4 +1,5 @@
 import { popWatcher, pushWatcher } from "./dep";
+import { callHook } from "../util";
 
 let id = 0 // 每次产生的watcher独一无二，有个唯一标志符id
 class Watcher{
@@ -55,7 +56,6 @@ class Watcher{
   }
   // 计算属性求值
   evluate() {
-    console.log('evluate')
     this.oldValue = this.get() // 调用计算属性的计算函数,并绑定this指向
     this.dirty = false // false表示当前已经求过值了
   }
@@ -81,7 +81,11 @@ const watcherId = new Set()
 const queue = []
 
 function flushCallback() {
-  queue.forEach(watcher => watcher.run())
+  queue.forEach(watcher => {
+    callHook(watcher.vm, 'beforeUpdate')
+    watcher.run()
+    callHook(watcher.vm, 'updated')
+  })
   watcherId.clear()
   queue.length = 0
 }

@@ -49,7 +49,7 @@ function createComputed(vm, key) {
   const watcher = vm._computedWatcher[key]
   return () => { // 用户取值会执行这个方法
     if (watcher) {
-      if (watcher.dirty) { // 如果页面取值这个是true，则会调用这个方法更新值
+      if (watcher.dirty) { // 如果页面取值这个是true，则会调用这个方法重新进行求值更新值
         watcher.evluate()
       }
       if (Dep.target) { // 如果当前有渲染watcher，则把渲染watch也存到计算属性依赖的值里面，这样当属性刷新时会调用渲染watcher刷新页面
@@ -86,7 +86,7 @@ function initWatch(vm) {
     let handler = watches[key]
     if (typeof handler === 'object') {
       handler = handler.handler
-      options.immediate = true
+      options.immediate = !!handler.immediate
     }
     createWachter(vm, key, handler, options)
   }

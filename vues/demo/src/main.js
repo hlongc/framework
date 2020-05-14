@@ -22,3 +22,23 @@ new Vue({
   components: { App },
   template: '<App/>'
 })
+
+// import obj, { print, set } from './test'
+
+// console.log(obj)
+// // obj.a = 8
+// set(5)
+// console.log(obj)
+
+// obj.a = 999
+
+
+// print()
+
+// let v = require('./test')
+
+// console.log(v.a)
+
+// v.add()
+
+// console.log(v.a)

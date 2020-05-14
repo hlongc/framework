@@ -1,19 +1,26 @@
 import { initState } from './observe'
 import Watcher from './observe/watcher'
-import { compiler } from './util'
+import { compiler, mergeOptions, callHook } from './util'
 import { h, render, patch } from './vdom'
+import { initGlobalApi } from './globalApi'
 
 function Vue(options) {
   this._init(options) // 初始化vue
 }
 
+initGlobalApi(Vue)
+
 Vue.prototype._init = function(options) {
   const vm = this
-  vm.$options = options // 保存用户传入的配置项
-
+  // 当前实例和父类的options进行合并
+  vm.$options = mergeOptions(vm.constructor.options, options) // 保存用户传入的配置项
   // 初始化状态,拦截数组方法和对象的属性
+  console.log(this.$options)
+  // beforeCreate
+  callHook(vm, 'beforeCreate')
   initState(vm)
-
+  // create
+  callHook(vm, 'created')
   // 挂载组件
   if (vm.$options.el) {
     vm.$mount()
@@ -41,11 +48,12 @@ Vue.prototype.$mount = function() {
   const updateComponent = () => { // 更新和初次渲染
     vm._update(vm._render())
   }
+  callHook(vm, 'beforeMount')
   new Watcher(vm, updateComponent) // 渲染watcher，会给Dep.target赋值
+  callHook(vm, 'mounted')
 }
 
 Vue.prototype._update = function(newVnode) {
-
   const prevVnode = this.prevVnode
   if (!prevVnode) {
     // 说明是首次渲染,直接调用render函数渲染

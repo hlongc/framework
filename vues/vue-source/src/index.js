@@ -1,12 +1,56 @@
 import Vue from 'vue'
 
+Vue.mixin({
+  a: 1,
+  obj: {
+    c: 2,
+    e: 4
+  },
+  beforeCreate() {
+    console.log('beforeCreate1')
+  }
+})
+
+Vue.mixin({
+  b: 2,
+  obj: {
+    c: 2,
+    d: 3
+  },
+  beforeCreate() {
+    console.log('beforeCreate2')
+  }
+})
+
+// debugger
 const vm = new Vue({
   el: '#app',
   data() {
     return {
       msg: 'hello',
+      hobby: ['足球', '篮球', '台球'],
       count: 1
     }
+  },
+  beforeCreate() {
+    console.log('实例的beforeCreate')
+    console.log(this.msg)
+  },
+  created() {
+    console.log('created')
+    console.log(this.msg)
+  },
+  beforeMount() {
+    console.log('beforeMount')
+  },
+  mounted() {
+    console.log('mounted')
+  },
+  beforeUpdate() {
+    console.log('beforeUpdate')
+  },
+  updated() {
+    console.log('updated')
   },
   render(h) {
     return h('div', { id: 'container' }, 
@@ -15,6 +59,7 @@ const vm = new Vue({
     )
   }
 })
+
 
 setTimeout(() => {
   vm.msg = 'world'

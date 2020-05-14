@@ -32,3 +32,71 @@ export function compiler(node, vm) {
     }
   })
 }
+
+export const LIFECYCLE_HOOKS = [
+  'beforeCreate',
+  'created',
+  'beforeMount',
+  'mounted',
+  'beforeUpdate',
+  'updated',
+  'beforeDestroy',
+  'destroyed',
+  'activated',
+  'deactivated',
+  'errorCaptured',
+  'serverPrefetch'
+]
+
+const strategy = {}
+
+LIFECYCLE_HOOKS.forEach(hook => {
+  strategy[hook] = mergeHook
+})
+
+function mergeHook(old, news) {
+  if (old && news) {
+    return old.concat(news)
+  } else if (old) {
+    return [old]
+  } else {
+    return [news]
+  }
+}
+
+export function callHook(vm, hook) {
+  const hooks = vm.$options[hook]
+  if (hooks) {
+    hooks.forEach(hook => hook.call(vm))
+  }
+}
+
+export function mergeOptions(parent, child) {
+  const options = {}
+  function mergeField(key) {
+    // 如果都是对象，那么进行合并
+    if (strategy[key]) {
+      return options[key] = strategy[key](parent[key], child[key])
+    }
+    if (typeof parent[key] === 'object' && parent[key] !== null && typeof child[key] === 'object' && child[key] !== null) {
+      options[key] = {
+        ...parent[key],
+        ...child[key]
+      }
+    } else if (parent[key] && !child[key]) { // 如果儿子没有，父亲那就用父亲的
+      options[key] = parent[key]
+    } else { // 如果都有且不是对象，那就用儿子的覆盖父亲的
+      options[key] = child[key]
+    }
+  }
+  for (const key in parent) {
+    mergeField(key)
+  }
+
+  for (const key in child) {
+    if (!parent.hasOwnProperty(key)) { // 已经合并过的属性就不用再合并了
+      mergeField(key)
+    }
+  }
+  return options
+}
