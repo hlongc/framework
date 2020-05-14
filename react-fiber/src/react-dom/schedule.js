@@ -218,7 +218,7 @@ function completeUnitOfWork(currentFiber) {
 }
 
 // 处理每个fiber
-function performUnitOfWord(fiber) {
+function performUnitOfWork(fiber) {
   beginWork(fiber)
   if (fiber.child) {
     return fiber.child // 如果当前有孩子就处理孩子
@@ -286,7 +286,7 @@ function commitFiber(currentFiber) {
 function workLoop(deadline) {
   let shouldYield = false // 是否把控制权还给浏览器
   while (nextUnitOfWork && !shouldYield) { // 如果当前有任务或者不需要还回去，那么执行
-    nextUnitOfWork = performUnitOfWord(nextUnitOfWork)
+    nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
     shouldYield = deadline.timeRemaining() < 1
   }
   if (!nextUnitOfWork && workInProgressRoot) { // 如果没有下一个需要处理的fiber以后,就开始进入到commit阶段，渲染真实的节点
