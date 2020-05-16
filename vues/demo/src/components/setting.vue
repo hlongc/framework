@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div ref="container">
+    <p v-show="showDemo" class="hide">测试css中display:none时，v-show是否能生效</p>
+    <button @click="showDemo = !showDemo">toggle</button>
     <p>setting</p>
     <router-link to="/setting/user" tag="a">to user-manager</router-link>
     <router-link to="/setting/message" tag="a">to msg-manager</router-link>
@@ -12,6 +14,11 @@
 <script>
 export default {
   name: 'setting',
+  data() {
+    return {
+      showDemo: true
+    }
+  },
   mounted() {
     sessionStorage.setItem('name', 'hlongc')
     document.cookie = 'age=24'
@@ -48,6 +55,8 @@ export default {
     printOrder(targets).then(res => {
       console.log(res)
     })
+    console.log(this.$refs.container.innerHTML)
+    console.log(this.$refs.container.outerHTML)
   },
   methods: {
     handleClick() {
@@ -57,4 +66,7 @@ export default {
 }
 </script>
 <style>
+.hide {
+  display: none;
+}
 </style>
