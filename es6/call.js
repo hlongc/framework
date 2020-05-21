@@ -36,3 +36,10 @@ function bar() { console.log('bar') }
 foo.call.call.call(bar) // 相当于调用call.call(bar) => bar.call() => bar()
 // foo.apply.apply.apply(bar)
 foo.call(bar)
+
+
+Promise.resolve(1).finally(() => {
+  console.log('嘻嘻')
+}).then(data => {
+  console.log(data)
+})

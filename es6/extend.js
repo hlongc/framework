@@ -17,7 +17,7 @@ Tiger.prototype = Object.create(Animal.prototype, { constructor: { value: Tiger 
 
 const tiger = new Tiger('小老虎')
 // console.log(tiger.name)
-// tiger.say()
+tiger.say()
 // console.log(tiger.constructor)
 
-console.log(Tiger.prototype)
+// console.log(Tiger.prototype)
