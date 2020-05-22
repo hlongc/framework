@@ -1,0 +1,23 @@
+html, body {
+  padding: 0;
+  margin: 0;
+}
+@color: red;
+#root {
+  color: @color;
+  .empty {
+    width: 300px;
+    height: 100px;
+    background-image: url(./images/background.jpg);
+    background-size: contain;
+  }
+  .container {
+    box-sizing: border-box;
+    img {
+      width: 100px;
+    }
+  }
+}
+::placeholder {
+  color: dodgerblue;
+}

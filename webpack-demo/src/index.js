@@ -1,52 +1,66 @@
-const btn = document.getElementById('btn')
+import React, { useState, useEffect } from 'react'
+import ReactDOM from 'react-dom'
+import axios from 'axios'
+import './index.less'
+import avatar from '@/images/avatar.jpg'
 
-function debounce(func, wait, immediate) {
-  let timer
-  return function() {
-    clearTimeout(timer)
-    if (immediate) {
-      if (!timer) func.apply(this, arguments)
-    }
-    timer = setTimeout(() => {
-      console.log(timer)
-      func.apply(this, arguments)
-      timer = null
-    }, wait)
-  }
-}
+function App() {
+  const [count, setCount] = useState(0)
+  const [value, setValue] = useState('')
+  const [hobby, setHobby] = useState([])
 
-function throttle(func, wait, option = {}) {
-  let previous = 0
-  let context
-  let args
-  let timer
-  return function() {
-    context = this
-    args = arguments
-    const now = Date.now()
-    const later = () => {
-      func.apply(context, args)
-      previous = now
-    }
-    const duration = now - previous // 当前间隔上一次执行的时间
-    if (duration > wait) { // 如果间隔时间大于等待时间了，就执行
-      if (timer) { // 如果之前有未执行的timer，直接清除
-        clearTimeout(timer)
-        timer = null
+  useEffect(() => {
+    console.log('count', count)
+  }, [count])
+
+  async function getHobby() {
+    try {
+      const res = await axios.get('/api/hobby')
+      if (res.data && res.data.success) {
+        setHobby(res.data.data)
       }
-      later()
-    } else {
-      if (!timer && option.trailing) { // 如果想执行最后一次，那就延迟执行,比如wait = 1秒，在1秒执行了一次，然后在1.2秒又触发了，此时还间隔不到一秒，希望也执行这一次的话
-        timer = setTimeout(() => {
-          later()
-        }, wait - duration)
-      }
+    } catch (e) {
+      console.log(e)
     }
   }
+
+  async function fetchData() {
+    try {
+      const res = await axios.get('/mock/info')
+      console.log(res)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  function handleClick() {
+    setCount(count + 1)
+  }
+
+  function handleChange(e) {
+    setValue(e.target.value)
+  }
+
+  return (
+    <div className='container'>
+      <div className='empty'></div>
+      <p>{ count }</p>
+      <button onClick={fetchData}>获取数据</button>
+      <img src={avatar} />
+      <p>爱好：</p>
+      <button onClick={getHobby}>看下爱好</button>
+      <ul>
+        { hobby.map(item => <li key={item}>{item}</li>) }
+      </ul>
+      <button onClick={handleClick}>+</button>
+      <input value={value} onChange={handleChange} placeholder='请输入' />
+      <p>{ value }</p>
+    </div>
+  )
 }
 
-function test() {
-  console.log('嘻嘻')
-}
+ReactDOM.render(<App />, document.getElementById('root'))
 
-btn.addEventListener('click', throttle(test, 2000, { trailing: true }))
+if (module.hot) {
+  module.hot.accept()
+}
