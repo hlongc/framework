@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    const html = '<h1>hello world</h1>'
+    const blob = new Blob([html], { type: 'text/html' })
+    const a = document.createElement('a')
+    a.href = window.URL.createObjectURL(blob)
+    a.setAttribute('download', 'test.html')
+    a.innerText = '测试下载'
+    document.body.appendChild(a)
+  </script>
+</body>
+</html>
