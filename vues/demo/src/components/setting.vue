@@ -20,6 +20,8 @@ export default {
     }
   },
   mounted() {
+    // this.$options._base === Vue 等于Vue构造函数
+    console.log(this.$options._base)
     sessionStorage.setItem('name', 'hlongc')
     document.cookie = 'age=24'
     const targets = [
