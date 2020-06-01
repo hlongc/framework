@@ -1,5 +1,8 @@
 #!/Users/haizhi/.nvm/versions/node/v13.0.1/bin/node
 
+
+// #! /usr/bin/env node 
+
 let program = require('commander')
 
 let configs = {
