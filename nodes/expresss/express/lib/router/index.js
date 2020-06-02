@@ -41,7 +41,11 @@ Router.prototype.handle = function (req, res, out) {
     if (index >= this.stack.length) return out()
     const layer = this.stack[index++]
     if (err) { // 如果有错误，要交给错误中间件来处理
-      layer.handle_error(err, req, res, next)
+      if (!layer.router) { // 当前是中间件就尝试进行处理
+        layer.handle_error(err, req, res, next)
+      } else { // 不是中间件就继续往下面传递
+        next(err)
+      }
     } else {
       if (layer.match(pathname)) { // 中间件和路由都要匹配路径
         if (!layer.route) { // 不存在route属性就是中间件
