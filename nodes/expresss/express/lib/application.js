@@ -1,6 +1,9 @@
 const http = require('http')
 const Router = require('./router')
 const methods = require('methods')
+const url = require('url')
+const fs = require('fs')
+const mime = require('mime')
 
 function Application() {}
 
@@ -9,6 +12,30 @@ Application.prototype.lazy_router = function() {
   if (!this._router) {
     this._router = new Router
   }
+  // 在真正处理请求之前，先在req res上挂载一些属性和方法
+  this._router.use((req, res, next) => {
+    // 在req上面增加 query查询参数 path请求路径
+    const { query, path: p } = url.parse(req.url, true)
+    req.query = query
+    req.path = p
+
+    // res 上面增加send方法和sendFile
+    res.send = function(value) {
+      if (Buffer.isBuffer(value) || typeof value === 'string') {
+        res.end(value)
+      } else if (typeof value === 'object') {
+        res.end(JSON.stringify(value))
+      }
+    }
+
+    res.sendFile = function(filename, { root } = {}) {
+      const absPath = root ? path.resolve(root, filename) : filename
+      res.setHeader('Content-Type', mime.lookup(absPath) + ';charset=utf8')
+      fs.createReadStream(absPath).pipe(res)
+    }
+
+    next()
+  })
 }
 // 设置各种请求方法
 methods.forEach(method => {
