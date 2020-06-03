@@ -12,7 +12,8 @@ Layer.prototype.match = function(pathname) {
       return true
     }
     // pathname = '/a'   this.path = '/a/b'
-    if (this.path.startsWith(pathname + '/')) {
+    // 需要匹配的路径如果是以当前路径开头，那就匹配成功
+    if (pathname.startsWith(this.path + '/')) {
       return true
     }
   }
