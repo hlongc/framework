@@ -23,6 +23,11 @@ Application.prototype.use = function() {
   this._router.use(...arguments)
 }
 
+Application.prototype.param = function(key, callback) {
+  this.lazy_router()
+  this._router.param(key, callback)
+}
+
 Application.prototype.listen = function(...args) {
   this.lazy_router()
   const server = http.createServer((req, res) => {

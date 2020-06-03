@@ -9,6 +9,7 @@ function Router() {
     router.handle(req, res, next)
   }
   router.stack = []
+  router.paramCallbacks = {}
   // 挂载原型方法
   router.__proto__ = Object.create(proto)
   return router
@@ -32,6 +33,42 @@ proto.use = function(path, handler) {
   const layer = new Layer(path, handler)
   // 中间件的layer没有route属性
   this.stack.push(layer)
+}
+
+// 路由参数处理 发布订阅-订阅
+proto.param = function(key, callback) {
+  if (!this.paramCallbacks[key]) {
+    this.paramCallbacks[key] = [callback]
+  } else {
+    this.paramCallbacks[key].push(callback)
+  }
+}
+
+// 执行路由逻辑之前先处理参数回调 发布订阅-发布
+proto.handle_callbacks = function(layer, req, res, done) {
+  let keys = layer.keys
+  if (!keys) { // 如果当前没有路由参数那就直接执行路由函数
+    return done()
+  }
+  keys = keys.map(item => item.name)
+  let index = 0
+  const next = () => {
+    if (index >= keys.length) return done()
+    const key = keys[index++] // 按顺序执行参数的回调 /info/:name/:age 先执行name的回调，再执行age
+    const callbacks = this.paramCallbacks[key]
+    if (callbacks && callbacks.length) {
+      let idx = 0
+      const dispatch = () => {
+        if (idx >= callbacks.length) return next()
+        const callback = callbacks[idx++] // 取出name所有回调中的一个执行
+        callback(req, res, dispatch, layer.params[key], key)
+      }
+      dispatch()
+    } else {
+      next()
+    }
+  }
+  next()
 }
 
 methods.forEach(method => {
@@ -79,7 +116,10 @@ proto.handle = function (req, res, out) {
         } else { // 路由还要匹配方法
           if (layer.route.methods[reqMethod]) {
             req.params = layer.params || {}
-            layer.handle_request(req, res, next)
+            // 执行完参数回调再执行真正的路由逻辑
+            this.handle_callbacks(layer, req, res, () => {
+              layer.handle_request(req, res, next)
+            })
           } else {
             next()
           }
