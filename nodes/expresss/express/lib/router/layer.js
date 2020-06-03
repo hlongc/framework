@@ -1,6 +1,9 @@
+const pathToRegexp = require('path-to-regexp')
+
 function Layer(path, handler) {
   this.path = path
   this.handler = handler
+  this.reg = pathToRegexp(path, this.keys = [], true) // 记录当前路径的正则
 }
 
 Layer.prototype.match = function(pathname) {
@@ -14,6 +17,16 @@ Layer.prototype.match = function(pathname) {
     // pathname = '/a'   this.path = '/a/b'
     // 需要匹配的路径如果是以当前路径开头，那就匹配成功
     if (pathname.startsWith(this.path + '/')) {
+      return true
+    }
+  } else { // 如果是路由，则处理params参数
+    const match = pathname.match(this.reg)
+    if (match) { // 路径匹配成功就处理参数
+      const values = match.slice(1)
+      this.params = values.reduce((memo, current, index) => {
+        memo[this.keys[index].name] = current
+        return memo
+      }, {})
       return true
     }
   }

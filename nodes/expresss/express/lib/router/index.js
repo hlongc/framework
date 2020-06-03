@@ -78,6 +78,7 @@ proto.handle = function (req, res, out) {
           }
         } else { // 路由还要匹配方法
           if (layer.route.methods[reqMethod]) {
+            req.params = layer.params || {}
             layer.handle_request(req, res, next)
           } else {
             next()
