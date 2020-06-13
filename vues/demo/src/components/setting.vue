@@ -3,6 +3,7 @@
     <p v-show="showDemo" class="hide">测试css中display:none时，v-show是否能生效</p>
     <button @click="showDemo = !showDemo">toggle</button>
     <p>setting</p>
+    <Demo v-model="inputValue" @changeName="value => inputValue = value" />
     <router-link to="/setting/user" tag="a">to user-manager</router-link>
     <router-link to="/setting/message" tag="a">to msg-manager</router-link>
     <a href="http://localhost:8081/#/setting/user" target="_blank">打开新页面</a>
@@ -12,11 +13,16 @@
 </template>
 
 <script>
+import qs from 'query-string'
+import Demo from './Demo.vue'
+
 export default {
   name: 'setting',
+  components: { Demo },
   data() {
     return {
-      showDemo: true
+      showDemo: true,
+      inputValue: ''
     }
   },
   mounted() {
@@ -47,7 +53,6 @@ export default {
             setValue(xhr.response || xhr.responseText, index)
           }
           xhr.onerror = function(err) {
-            console.log(err)
             setValue(err, index)
           }
           xhr.send()
@@ -57,8 +62,11 @@ export default {
     printOrder(targets).then(res => {
       console.log(res)
     })
-    console.log(this.$refs.container.innerHTML)
-    console.log(this.$refs.container.outerHTML)
+    console.log(qs.parse('d=1&b=2&c=北京'))
+    const u = new URLSearchParams('d=1&b=2&c=北京')
+    console.log(u.get('d'), u.get('b'), u.get('c'))
+    u.set('d', '666')
+    console.log(u, u.get('d'))
   },
   methods: {
     handleClick() {
