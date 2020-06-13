@@ -1,0 +1,75 @@
+.resolve-menu {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  padding-left: 0;
+  box-shadow: $menu-box-shadow;
+  .menu-item {
+    position: relative;
+    padding: $menu-item-padding-y $menu-item-padding-x;
+    color: $black;
+    cursor: pointer;
+    border-bottom: 0;
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      width: 0;
+      transition: all .3s;
+      background-color: $menu-item-active-color;
+    }
+    &.active {
+      color: $menu-item-active-color;
+      &::after {
+        width: 100%;
+      }
+    }
+    &:hover, &:focus {
+      text-decoration: none;
+    }
+    &.disabled {
+      color: $menu-item-disabled-color;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+  .submenu {
+    position: relative;
+    padding: $menu-item-padding-y $menu-item-padding-x;
+    color: $black;
+    cursor: pointer;
+    .submenu-title {
+      margin: 0;
+    }
+    .resolve-menu {
+      position: absolute;
+      top: 100%;
+    }
+  }
+  &.vertical {
+    flex-direction: column;
+    .menu-item {
+      position: relative;
+      &::after {
+        display: none;
+      }
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        background-color: $menu-item-active-color;
+      }
+      &.active {
+        &::before {
+          width: 3px;
+        }
+      }
+    }
+  }
+}
