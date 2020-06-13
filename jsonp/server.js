@@ -1,6 +1,8 @@
 const express = require('express')
+const cookieParser = require('cookie-parser')
 
 const app = express()
+app.use(cookieParser())
 
 app.all('*', (req, res, next) => {
   // 如果设置为 * 的话，是无法带上cookie的
@@ -16,6 +18,7 @@ app.get('/test/jsonp', (req, res) => {
   const callback = req.query.callback
   const result = {
     success: true,
+    type: 'jsonp',
     data: 'xixi'
   }
   // 调用客户端的callback方法并执行
@@ -23,9 +26,11 @@ app.get('/test/jsonp', (req, res) => {
 })
 
 app.get('/test/cors', (req, res) => {
-  res.cookie('hello', 'world12')
+  console.log(req.cookies)
   res.send({
     success: true,
+    type: 'cors',
+    cookie: req.cookies,
     data: req.query
   })
 })
