@@ -1,4 +1,6 @@
 const { resolve } = require('./utils')
+const CommentPlugin = require('../plugins/Comment')
+const HotModuleReplacementPlugin = require('webpack/lib/HotModuleReplacementPlugin')
 
 module.exports = {
   mode: 'development',
@@ -8,7 +10,7 @@ module.exports = {
     port: 8888,
     compress: true,
     hot: true, // 热更新，无需刷新浏览器
-    open: true, // 自动打开浏览器
+    open: false, // 自动打开浏览器
     // 静态服务器代理,解决开发环境跨域问题
     proxy: {
       // 捕获/api 开头的请求
@@ -63,6 +65,7 @@ module.exports = {
     ]
   },
   plugins: [
-    
+    new HotModuleReplacementPlugin()
+    // new CommentPlugin()
   ]
 }

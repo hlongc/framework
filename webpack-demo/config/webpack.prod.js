@@ -2,6 +2,9 @@ const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin') // 抽离css
 const TerserWebpackPlugin = require('terser-webpack-plugin') // 压缩js
 const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin') // 压缩css
+// 打包分析插件
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const ModuleConcatenationPlugin = require('webpack/lib/optimize/ModuleConcatenationPlugin')
 
 const { resolve } = require('./utils')
 
@@ -10,6 +13,10 @@ module.exports = {
   externals: {
     'react': 'React',
     'react-dom': 'ReactDOM',
+  },
+  resolve: {
+    // 优先使用es语法
+    mainFields: ['jsnext:main', 'browser', 'main']
   },
   module: {
     rules: [
@@ -39,10 +46,16 @@ module.exports = {
           },
           'css-loader',
           'postcss-loader',
-          'less-loader'
-        ],
-        include: resolve('../src'),
-        exclude: /node_modules/
+          {
+            loader: 'less-loader',
+            options: {
+              // 解决按需加载antd less样式报错的问题
+              lessOptions: {
+                javascriptEnabled: true
+              }
+            }
+          }
+        ]
       },
       {
         test: /\.(jpg|png|bmp|gif|svg)/,
@@ -63,6 +76,8 @@ module.exports = {
     ]
   },
   plugins: [
+    new BundleAnalyzerPlugin(),
+    new ModuleConcatenationPlugin(), // 开启Scope Hosting
     new TerserWebpackPlugin({
       cache: true, // 开启缓存
       parallel: true // 开启多核并行压缩
@@ -91,5 +106,26 @@ module.exports = {
         }
       ]
     })
-  ]
+  ],
+  optimization: {
+    splitChunks: {
+      chunks: 'all', // 对同步和异步代码都生效
+      cacheGroups: {
+        vendors: { // 第三方模块比如lodash axios之类的
+          name: 'vendors',
+          test: /node_modules/,
+          priority: 1, // 权限更高，优先抽离
+          minSize: 0,
+          minChunks: 1 // 最少复用几次才抽离出来,第三方模块只要被引用一次就被抽离出来
+        },
+        default: { // 自己写的工具方法之类的
+          name: 'default',
+          priority: 0,
+          reuseExistingChunk: true, //如果一个模块已经被打包过了,那么再打包时就忽略这个上模块
+          minSize: 0,
+          minChunks: 2 // 自己写的公共方法至少被引用两次才需要抽离出来
+        }
+      }
+    }
+  }
 }

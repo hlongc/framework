@@ -3,33 +3,8 @@ import ReactDOM from 'react-dom'
 import axios from 'axios'
 import './index.less'
 import avatar from '@/images/avatar.jpg'
-
-function Child(props, ref) {
-  const inputRef = useRef()
-  useImperativeHandle(ref, () => ({
-    focus() {
-      handleFocus()
-    },
-    greet() {
-      console.log('hello ')
-    }
-  }))
-  function handleFocus() {
-    inputRef.current.focus()
-  }
-  function handleBlur() {
-    inputRef.current.blur()
-  }
-  return (
-    <>
-      <p>我是子元素</p>
-      <button onClick={handleBlur}>失去焦点</button>
-      <input ref={inputRef} />
-    </>
-  )
-}
-
-Child = forwardRef(Child)
+import { add, sub } from './common'
+import Child from './Child'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -38,6 +13,7 @@ function App() {
   const childRef = useRef()
 
   useEffect(() => {
+    console.log(add(1, 100))
     console.log('count', count)
   }, [count])
 
@@ -77,8 +53,15 @@ function App() {
     childRef.current.greet()
   }
 
+  function onChange(a, b, c) {
+    console.log(a, b, c)
+  }
+
   return (
     <div className='container'>
+      <p className='test'>绿色的1字</p>
+      <p className='demo'>测试demo</p>
+      <p className='foo'>嘻嘻哈哈</p>
       <button onClick={handleChildClick}>触发子元素的聚焦</button>
       <button onClick={greet}>子元素打个招呼</button>
       <Child ref={childRef} />

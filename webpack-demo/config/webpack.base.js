@@ -42,7 +42,7 @@ module.exports = env => {
           removeAttributeQuotes: true // 移除html元素属性的双引号
         },
         chunksSortMode: 'manual', // 对引入的chunk进行手动排序
-        chunks: ['b', 'main'] // 先引入b.bundle.js 再引入 main.bundle.js
+        chunks: ['vendors', 'default', 'b', 'main'] // 先引入b.bundle.js 再引入 main.bundle.js
       }),
       new CleanWebpackPlugin()
     ],
