@@ -1,9 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const Merge = require('webpack-merge')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin') // 删除之前打包的目录
 const { resolve } = require('./utils')
-const dev = require('./webpack.dev')
-const prod = require('./webpack.prod')
 
 module.exports = env => {
   const isDev = env.development
@@ -14,7 +11,7 @@ module.exports = env => {
       b: resolve('../src/other.js')
     },
     output: {
-      path: resolve('../dist'),
+      path: resolve(`../${isDev ? 'dll' : 'dist'}`),
       // hash 每次打包的hash值
       // chunkHash 当前chunk改变hash就会变化
       // contentHash 内容变化才会变化
@@ -34,7 +31,7 @@ module.exports = env => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: resolve('../public/index.html'),
+        template: resolve(isDev ? '../public/dev.html' : '../public/prod.html'),
         pathname: 'index.html',
         hash: true,
         minify: isDev ? false : {
@@ -43,8 +40,7 @@ module.exports = env => {
         },
         chunksSortMode: 'manual', // 对引入的chunk进行手动排序
         chunks: ['vendors', 'default', 'b', 'main'] // 先引入b.bundle.js 再引入 main.bundle.js
-      }),
-      new CleanWebpackPlugin()
+      })
     ],
     module: {
       rules: [
@@ -56,12 +52,12 @@ module.exports = env => {
         // },
         {
           test: /\.jsx?$/,
-          use: 'babel-loader',
+          use: 'babel-loader?cacheDirectory=true',
           include: [resolve('../src')],
           exclude: /node_modules/
         }
       ]
     }
   }
-  return isDev ? Merge(base, dev) : Merge(base, prod)
+  return isDev ? Merge(base, require('./webpack.dev')) : Merge(base, require('./webpack.prod'))
 }

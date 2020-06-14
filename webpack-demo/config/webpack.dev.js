@@ -1,11 +1,12 @@
-const { resolve } = require('./utils')
+const { resolve, join } = require('./utils')
 const CommentPlugin = require('../plugins/Comment')
 const HotModuleReplacementPlugin = require('webpack/lib/HotModuleReplacementPlugin')
+const DllReferencePlugin = require('webpack/lib/DllReferencePlugin')
 
 module.exports = {
   mode: 'development',
   devServer: {
-    contentBase: resolve('../dist'), // 静态服务器根路径
+    contentBase: resolve('../dll'), // 静态服务器根路径
     host: 'localhost',
     port: 8888,
     compress: true,
@@ -65,7 +66,12 @@ module.exports = {
     ]
   },
   plugins: [
-    new HotModuleReplacementPlugin()
+    new HotModuleReplacementPlugin(),
+    // 告诉webpack使用哪些动态链接库
+    new DllReferencePlugin({
+      // react动态链接库的文件内容
+      manifest: require(join(resolve('../dll'), 'react.manifest.json'))
+    })
     // new CommentPlugin()
   ]
 }

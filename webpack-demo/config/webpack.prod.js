@@ -2,9 +2,13 @@ const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin') // 抽离css
 const TerserWebpackPlugin = require('terser-webpack-plugin') // 压缩js
 const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin') // 压缩css
+const { CleanWebpackPlugin } = require('clean-webpack-plugin') // 删除之前打包的目录
 // 打包分析插件
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const ModuleConcatenationPlugin = require('webpack/lib/optimize/ModuleConcatenationPlugin')
+const HappyPack = require('happypack')
+const os = require('os')
+const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
 
 const { resolve } = require('./utils')
 
@@ -20,6 +24,12 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.jsx?$/,
+        use: 'happypack/loader?id=happyBabel',
+        include: [resolve('../src')],
+        exclude: /node_modules/
+      },
       {
         test: /\.css$/,
         use: [
@@ -77,7 +87,21 @@ module.exports = {
   },
   plugins: [
     new BundleAnalyzerPlugin(),
+    new CleanWebpackPlugin(),
     new ModuleConcatenationPlugin(), // 开启Scope Hosting
+    new HappyPack({
+      //用id来标识 happypack处理那里类文件
+      id: 'happyBabel',
+      loaders: [
+        {
+          loader: 'babel-loader?cacheDirectory=true'
+        }
+      ],
+      //共享进程池
+      threadPool: happyThreadPool,
+      //允许 HappyPack 输出日志
+      verbose: true
+    }),
     new TerserWebpackPlugin({
       cache: true, // 开启缓存
       parallel: true // 开启多核并行压缩
