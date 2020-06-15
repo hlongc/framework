@@ -50,8 +50,8 @@ class Server {
   async cache(req, res, absPath, statObj) {
     // 设置强制缓存,设置一分钟的缓存，一分钟之内访问让浏览器去缓存里面拿，并且状态码是200
     // 首页是无法缓存的，但是可以缓存首页中的资源
-    // no-cache 浏览器会缓存，但是每次会去请求服务器，看是否有新的修改
-    // no-store 浏览器不缓存，直接请求服务器
+    // no-cache 在浏览器使用缓存前，会往返对比ETag，如果ETag没变，返回304，则使用缓存
+    // no-store  彻底禁用缓冲，所有内容都不会被缓存到缓存或临时文件中。
     res.setHeader('Expires', new Date(new Date() + 60 * 1000).toGMTString())
     res.setHeader('Cache-Control', 'no-cache')
     // 浏览器会自动把这个上次服务器设置的时间带过来
