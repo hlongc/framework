@@ -15,7 +15,7 @@ function createElement(type, props, ...children) {
 }
 
 class Component {
-  constructor(props) {
+  constructor(props, context, updater) {
     this.props = props
   }
   setState(partial) {

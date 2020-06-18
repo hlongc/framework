@@ -103,6 +103,7 @@ function updateRoot(fiber) {
 function reconcilerChildren(currentFiber, children) {
   let childIndex = 0
   let previousFiber = null
+  // 如果之前存在旧的fiber节点，那就尽可能复用
   let oldFiber = currentFiber.alternate && currentFiber.alternate.child
   if (oldFiber) oldFiber.firstEffect = oldFiber.nextEffect = oldFiber.lastEffect = null
   // 只要有一个还没完成那就继续

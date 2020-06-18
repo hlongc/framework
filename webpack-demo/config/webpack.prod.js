@@ -1,12 +1,12 @@
 const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin') // 抽离css
-const TerserWebpackPlugin = require('terser-webpack-plugin') // 压缩js
+const TerserWebpackPlugin = require('terser-webpack-plugin') // 压缩js,替代uglifyjs-webpack-plugin,因为uglify不支持es6语法
 const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin') // 压缩css
 const { CleanWebpackPlugin } = require('clean-webpack-plugin') // 删除之前打包的目录
 // 打包分析插件
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const ModuleConcatenationPlugin = require('webpack/lib/optimize/ModuleConcatenationPlugin')
-const HappyPack = require('happypack')
+const HappyPack = require('happypack') // 多进程打包
 const os = require('os')
 const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length })
 

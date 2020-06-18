@@ -15,7 +15,7 @@ module.exports = {
   },
   plugins: [
     new DLLPlugin({
-      // 动态链接库的全局变量名称，需要和pitput.library中保持一致
+      // 动态链接库的全局变量名称，需要和output.library中保持一致
       // 该字段的值也就是输出的manifest.json文件中name字段的值
       // 例如 react.manifest.json文件输出时的文件名称
       name: '_dll_[name]',
