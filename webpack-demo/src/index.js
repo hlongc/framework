@@ -59,6 +59,15 @@ function App() {
 
   return (
     <div className='container'>
+      <div className='wrapper'>
+        <h1 className='sticky-box'>测试文字1</h1>
+        <h1 className='sticky-box'>测试文字2</h1>
+        <h1 className='sticky-box'>测试文字3</h1>
+        <h1 className='sticky-box'>测试文字4</h1>
+        <h1 className='sticky-box'>测试文字5</h1>
+        <h1 className='sticky-box'>测试文字6</h1>
+        <h1 className='sticky-box'>测试文字7</h1>
+      </div>
       <p className='test'>绿色的1字</p>
       <p className='demo'>测试demo</p>
       <p className='foo'>嘻嘻哈哈</p>
