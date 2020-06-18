@@ -18,7 +18,7 @@ class ReadStream extends EventEmitter {
     this.flags = options.flags || 'r' // 以什么模式进行文件操作
     this.encoding = options.encoding || 'buffer' // 读出来的格式
     this.mode = options.mode || 0x666 // 以哪种权限读 666代表只有读写，但是没有执行的权限
-    this.autoClose = options.mode || true
+    this.autoClose = options.autoClose || true
     this.emitClose = options.emitClose || true
     this.start = options.start || 0 // 从文件哪个位置开始读取
     this.end = options.end

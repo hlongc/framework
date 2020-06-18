@@ -8,7 +8,7 @@ const rs = new ReadStream('./name.txt', {
   autoClose: true, // 读完了以后自动关闭
   // emitClose: true, // 触发close事件
   start: 0, // 从0开始读
-  end: 9, // 读到9 start<=x<=end 闭区间
+  // end: 9, // 读到9 start<=x<=end 闭区间
   highWaterMark: 3 // 每次读3个
 })
 
