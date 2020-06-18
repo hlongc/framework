@@ -1,94 +1,37 @@
-// import React from './react'
-// import ReactDOM from './react-dom'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { HashRouter as Router, Switch, Link, Route, Redirect } from 'react-router-dom'
 
-// class Counter extends React.Component {
-//   constructor() {
-//     super()
-//     this.state = {
-//       count: 0
-//     }
-//   }
-//   componentDidMount() {
-//     this.setState(prevState => ({ count: prevState.count + 1 }))
-//     console.log(this.state.count)
-//     this.setState(prevState => ({ count: prevState.count + 1 }))
-//     console.log(this.state.count)
-//     setTimeout(() => {
-//       this.setState(prevState => ({ count: prevState.count + 1 }))
-//       console.log(this.state.count)
-//       this.setState(prevState => ({ count: prevState.count + 1 }))
-//       console.log(this.state.count)
-//       // this.setState(prevState => ({ count: prevState.count + 1 }))
-//       // console.log(this.state.count)
-//       // this.setState(prevState => ({ count: prevState.count + 1 }))
-//       // console.log(this.state.count)
-//     })
-//   }
-//   render() {
-//     return NaN
-//   }
-// }
-// ReactDOM.render(<Counter />, document.getElementById('root'))
 
-class Dialog {
-  constructor(text) {
-    this.lastX = 0
-    this.lastY = 0
-    this.x = undefined
-    this.y = undefined
-    this.text = text || ''
-    this.isMoving = false
-    this.dialog = undefined
-  }
-  open() {
-    const model = document.createElement('div')
-    model.id='model'
-    model.style = `
-      position:absolute;
-      top:0;
-      left:0;
-      bottom:0;
-      right:0;
-      background-color:rgba(0,0,0,.3);
-      display:flex;
-      justify-content: center;
-      align-items: center;
-    `
-    model.addEventListener('click',this.close.bind(this))
-    document.body.appendChild(model)
-    this.dialog = document.createElement('div')
-    this.dialog.style = `
-      padding:20px;
-      background-color:white
-    `
-    this.dialog.innerText = this.text
-    this.dialog.addEventListener('click',e=>{e.stopPropagation()})
-    this.dialog.addEventListener('mousedown', this.handleMousedown.bind(this))
-    document.addEventListener('mousemove', this.handleMousemove.bind(this))
-    document.addEventListener('mouseup', this.handleMouseup.bind(this))
-    model.appendChild(this.dialog)
-  }
-  close() {
-    this.dialog.removeEventListener('mousedown',this.handleMousedown)
-    document.removeEventListener('mousemove', this.handleMousemove)
-    document.removeEventListener('mouseup',this.handleMouseup)
-    document.body.removeChild(document.querySelector('#model')) 
-  }
-  handleMousedown(e) {
-    this.isMoving = true
-    this.x = e.clientX
-    this.y = e.clientY
-  }
-  handleMousemove(e) {
-    if (this.isMoving) {
-      this.dialog.style.transform = `translate(${e.clientX - this.x + this.lastX}px,${e.clientY - this.y + this.lastY}px)`
-    }
-  }
-  handleMouseup(e) {
-    this.lastX = e.clientX - this.x + this.lastX
-    this.lastY = e.clientY - this.y + this.lastY
-    this.isMoving = false
-  }
+function Home(props) {
+  console.log(props)
+  return <div>Home</div>
 }
-let dialog = new Dialog('Hello')
-dialog.open()
+
+function Info(props) {
+  return <div>Info</div>
+}
+
+function User(props) {
+  return <div>User</div>
+}
+
+function App() {
+  return (
+    <Router>
+      <div>
+        <Link to='/home'>home</Link>
+        <Link to='/info'>info</Link>
+        <Link to='/user'>user</Link>
+      </div>
+      <Switch>
+        <Route path='/home' component={Home} />
+        <Route path='/info' component={Info} />
+        <Route path='/user' component={User} />
+        <Redirect to='/home' />
+      </Switch>
+    </Router>
+  )
+}
+
+ReactDOM.render(<App />, document.querySelector('#root'))
