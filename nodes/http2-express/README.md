@@ -9,3 +9,6 @@
 ### 4. openssl req -new -key server.key -out server.csr
 
 ### 5. openssl x509 -req -sha256 -days 365 -in server.csr -signkey server.key -out server.crt
+
+创建http2证书和公钥
+### openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \ -keyout key.pem -out cert.pem
