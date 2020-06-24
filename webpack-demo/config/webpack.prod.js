@@ -89,6 +89,7 @@ module.exports = {
     new BundleAnalyzerPlugin(),
     new CleanWebpackPlugin(),
     new ModuleConcatenationPlugin(), // 开启Scope Hosting
+    // 小项目就不用开启happypack了，因为开启多进程打包也是需要耗费一定时间的
     new HappyPack({
       //用id来标识 happypack处理那里类文件
       id: 'happyBabel',
@@ -142,8 +143,8 @@ module.exports = {
           minSize: 0,
           minChunks: 1 // 最少复用几次才抽离出来,第三方模块只要被引用一次就被抽离出来
         },
-        default: { // 自己写的工具方法之类的
-          name: 'default',
+        common: { // 自己写的工具方法之类的  似乎这个只有在多入口中引用公共模块才会生效
+          name: 'common',
           priority: 0,
           reuseExistingChunk: true, //如果一个模块已经被打包过了,那么再打包时就忽略这个上模块
           minSize: 0,
