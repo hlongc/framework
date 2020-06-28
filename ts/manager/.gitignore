@@ -12,6 +12,9 @@
 /build
 /manager
 
+# development
+/dll
+
 # misc
 .DS_Store
 .env.local

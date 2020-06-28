@@ -25,7 +25,8 @@
     "start": "PORT=3003 react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
-    "eject": "react-app-rewired eject"
+    "eject": "react-app-rewired eject",
+    "dll": "webpack --config ./webpack.dll.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -45,9 +46,11 @@
   "devDependencies": {
     "babel-plugin-import": "^1.13.0",
     "customize-cra": "^1.0.0-alpha.0",
+    "html-webpack-externals-plugin": "^3.8.0",
     "less": "^3.11.3",
     "less-loader": "^6.1.2",
     "react-app-rewired": "^2.1.6",
-    "redux-devtools-extension": "^2.13.8"
+    "redux-devtools-extension": "^2.13.8",
+    "webpack-cli": "^3.3.12"
   }
 }
