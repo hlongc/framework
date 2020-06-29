@@ -7,6 +7,7 @@ import { add, sub } from './common'
 import Child from './Child'
 
 function App() {
+  console.log(process.env)
   const [count, setCount] = useState(0)
   const [value, setValue] = useState('')
   const [hobby, setHobby] = useState([])

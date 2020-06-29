@@ -1,9 +1,20 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const DefinePlugin = require('webpack/lib/DefinePlugin')
 const Merge = require('webpack-merge')
 const { resolve } = require('./utils')
+const getClientEnvironment = require('./env')
 
-module.exports = env => {
-  const isDev = env.development
+const publicUrl = '/'
+
+const env = getClientEnvironment(publicUrl)
+
+module.exports = () => {
+
+  // 模拟实现vue-cli create-react-app 里面的.env .env.development 
+  // 原来就是按优先级读出第一个存在的.env文件，然后把读出来的变量通过VUE_APP REACT_APP进行过滤
+  // 最后通过DefinePlugin 挂载到全局，在编译时注入进去
+
+  const isDev = process.env.NODE_ENV === 'development'
 
   const base = {
     entry: {
@@ -40,7 +51,9 @@ module.exports = env => {
         },
         chunksSortMode: 'manual', // 对引入的chunk进行手动排序
         chunks: ['vendors', 'common', 'b', 'main'] // 先引入b.bundle.js 再引入 main.bundle.js
-      })
+      }),
+      // 注入环境变量
+      new DefinePlugin(env.stringified)
     ],
     module: {
       rules: [
