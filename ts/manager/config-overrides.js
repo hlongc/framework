@@ -55,7 +55,8 @@ module.exports = {
       'react-dom': 'ReactDOM'
     }),
     addWebpackAlias({
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, 'src'),
+      'components': path.resolve(__dirname, 'src/components'),
     }),
     config => {
       isDev && config.plugins.push(new HtmlWebpackPlugin({

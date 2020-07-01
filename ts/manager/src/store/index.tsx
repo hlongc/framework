@@ -1,9 +1,9 @@
 import { combineReducers, createStore } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension'
-import user from './user'
+import loginState from './loginState'
 
 const reducers = combineReducers({
-  user
+  loginState
 })
 
 let devtool: any = () => {}

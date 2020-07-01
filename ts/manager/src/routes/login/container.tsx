@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Form, Input, Button, message } from 'antd'
 import { FormItemProps, FormProps } from 'antd/lib/form'
 import { RouteComponentProps } from 'react-router-dom'
+import { IUser } from '@/types'
 import './style.less'
 
 const tailLayout = {
@@ -9,16 +10,20 @@ const tailLayout = {
 }
 
 interface MapDispatchToProps {
-  login: () => void
+  login: (user: IUser) => void;
+  logout: () => void;
 }
 
 type LoginProps = FormItemProps & FormProps & RouteComponentProps & MapDispatchToProps
 
 const Login: React.FC<LoginProps> = props => {
+  useEffect(() => {
+    props.logout()
+  }, [])
 
   const onFinish = (values: any) => {
     if (values.username === 'admin' && values.password === '123456') {
-      props.login()
+      props.login({ username: 'admin' })
       props.history.push('/dashboard')
     } else {
       message.error('用户名或者密码错误')

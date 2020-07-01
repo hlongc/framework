@@ -1,13 +1,11 @@
 import { connect } from 'react-redux'
 import Login from './container'
-import { login } from '../../store/user/actions'
+import { login, logout } from '@/store/loginState/actions'
 
-const mapStateToProps = (state: any) => ({
-  loginStatus: state.user.loginStatus
-})
 
 const mapDispatchToProps = {
-  login
+  login,
+  logout
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Login)
+export default connect(null, mapDispatchToProps)(Login)
