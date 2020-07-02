@@ -1,6 +1,11 @@
 <template>
   <div class="hello">
     <router-link to="/example">to example</router-link>
+    <Slott>
+      <template slot="btn"><button>按钮2</button></template>
+      <button>点击事件</button>
+      <button>点击事件2</button>
+    </Slott>
     <p>{{ count }}</p>
     <button @click="addCount">count+</button>
     <h1>{{ msg }}</h1>
@@ -22,12 +27,13 @@
 <script>
 import Calender from './Calender.vue'
 import Test from './Test.js'
+import Slott from './Slott.vue'
 
 import { mapState, mapGetters, mapMutations, mapActions } from '../vuex.js'
 
 export default {
   name: 'HelloWorld',
-  components: { Calender, Test },
+  components: { Calender, Test, Slott },
   // 可进行重命名
   computed: {
     ...mapState({ salary: 'salary', x: 'a.x', z: 'a.c.z', name: 'f.name' }),
