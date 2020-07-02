@@ -8,7 +8,13 @@ const getInstance = () => {
   const realIns = vm.$children[0]
   return {
     success(options) {
-      return realIns.add(options)
+      return realIns.add(options, 'success')
+    },
+    error(options) {
+      return realIns.add(options, 'error')
+    },
+    warning(options) {
+      return realIns.add(options, 'warning')
     }
   }
 }
@@ -23,8 +29,12 @@ const Message = {
   success(option) {
     return getSingle().success(option)
   },
-  warning() {},
-  error() {}
+  warning(option) {
+    return getSingle().warning(option)
+  },
+  error(option) {
+    return getSingle().error(option)
+  }
 }
 
 let _Vue
