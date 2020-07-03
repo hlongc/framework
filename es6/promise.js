@@ -106,7 +106,13 @@ class Promise {
   static race(promises) {
     return new Promise((resolve, reject) => {
       if (promises.length === 0) resolve()
-      promises.forEach(p => p.then(resolve, reject))
+      promises.forEach(p => {
+        if (isPromise(p)) {
+          p.then(resolve, reject)
+        } else {
+          resolve(p)
+        }
+      })
     })
   }
   then (onFulfilled, onRejected) {
@@ -190,6 +196,7 @@ Promise.resolve(1).finally(() => {
 Promise.race([1, 2, Promise.resolve('嘻嘻')]).then(res => {
   console.log(res)
 })
+
 
 export default Promise
 
