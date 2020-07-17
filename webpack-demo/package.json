@@ -16,6 +16,7 @@
     "dotenv": "^8.2.0",
     "dotenv-expand": "^5.1.0",
     "happypack": "^5.0.1",
+    "hard-source-webpack-plugin": "^0.13.1",
     "html-webpack-plugin": "^4.2.0",
     "js-to-less-loader": "^0.0.1",
     "less": "^3.11.2",

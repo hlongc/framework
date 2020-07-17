@@ -14,16 +14,16 @@ const install = _Vue => {
   })
 }
 
-function forEach(obj, cb) {
+function forEach (obj, cb) {
   Object.keys(obj).forEach(key => cb(key, obj[key]))
 }
 
 class ModuleCollection {
-  constructor(options) {
+  constructor (options) {
     this.register([], options)
   }
   // 递归注册模块
-  register(path, parentModule) {
+  register (path, parentModule) {
     const rowModule = {
       _row: parentModule,
       state: parentModule.state,
@@ -50,14 +50,14 @@ class ModuleCollection {
 }
 
 // 每次拿到最新的state
-function getState(store, path) {
+function getState (store, path) {
   return path.reduce((local, cur) => {
     return local[cur]
   }, store.state)
 }
 
 // installModule(this, this.state, [], this.modules.root)
-function installModule(store, rootState, path, rowModule) {
+function installModule (store, rootState, path, rowModule) {
   let root = cloneDeep(store.modules.root)
   // 获取当前模块的命名空间
   let namespaced = path.reduce((str, cur) => {
@@ -114,7 +114,7 @@ function installModule(store, rootState, path, rowModule) {
 }
 
 class Store {
-  constructor(options) {
+  constructor (options) {
     this.options = options
     this.vm = new Vue({
       data: {
@@ -143,37 +143,37 @@ class Store {
     this.actions[action].forEach(fn => fn(payload))
   }
 
-  get state() {
+  get state () {
     return this.vm.state
   }
   // 订阅函数，当mutation执行时会依次执行
-  subscribe(fn) {
+  subscribe (fn) {
     this.plugins.push(fn)
   }
 
   // 替换state
-  replaceState(newState) {
+  replaceState (newState) {
     this.vm.state = newState
   }
 
-  registerModule(moduleName, module) {
+  registerModule (moduleName, module) {
     if (!Array.isArray(moduleName)) moduleName = [moduleName]
     this.modules.register(moduleName, module) // 注册模块
     installModule(this, this.state, moduleName, module.rowModule) // 安装新模块
   }
 }
 
-export function mapState(states) {
+export function mapState (states) {
   const obj = {}
   if (Array.isArray(states)) {
     states.forEach(stateName => {
-      obj[stateName] = function() {
+      obj[stateName] = function () {
         return this.$store.state[stateName]
       }
-  })
+    })
   } else if (states.toString().slice(-7, -1) === 'Object') { // 对象的方式可以允许重命名
     Object.entries(states).forEach(([rename, realName]) => {
-      obj[rename] = function() {
+      obj[rename] = function () {
         // 处理重命名深度取值的情况 z: 'a.c.z',先取a => c => z
         return realName.split('.').reduce((state, cur) => {
           return state[cur]
@@ -184,31 +184,31 @@ export function mapState(states) {
   return obj
 }
 
-export function mapGetters(getters) {
+export function mapGetters (getters) {
   const obj = {}
   if (Array.isArray(getters)) {
     getters.forEach(getterName => {
-      obj[getterName] = function() {
+      obj[getterName] = function () {
         return this.$store.getters[getterName]
       }
     })
   } else {
-    consol.error(`mapGetter函数参数只能为数组`)
+    console.error(`mapGetter函数参数只能为数组`)
   }
   return obj
 }
 
-export function mapMutations(mutations) {
+export function mapMutations (mutations) {
   const obj = {}
   if (Array.isArray(mutations)) {
     mutations.forEach(mutationName => {
-    obj[mutationName] = function(...payload) {
-      this.$store.commit(mutationName, ...payload)
-    }
-  })
+      obj[mutationName] = function (...payload) {
+        this.$store.commit(mutationName, ...payload)
+      }
+    })
   } else if (mutations.toString().slice(-7, -1) === 'Object') {
     Object.entries(mutations).forEach(([rename, realName]) => {
-      obj[rename] = function(...payload) {
+      obj[rename] = function (...payload) {
         this.$store.commit(realName, ...payload)
       }
     })
@@ -216,17 +216,17 @@ export function mapMutations(mutations) {
   return obj
 }
 
-export function mapActions(actions) {
+export function mapActions (actions) {
   const obj = {}
   if (Array.isArray(actions)) {
     actions.forEach(actionName => {
-      obj[actionName] = function(...payload) {
+      obj[actionName] = function (...payload) {
         this.$store.dispatch(actionName, ...payload)
       }
     })
   } else if (actions.toString().slice(-7, -1) === 'Object') {
     Object.entries(actions).forEach(([rename, realName]) => {
-      obj[rename] = function(...payload) {
+      obj[rename] = function (...payload) {
         this.$store.dispatch(realName, ...payload)
       }
     })

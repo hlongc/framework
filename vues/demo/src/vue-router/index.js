@@ -2,28 +2,28 @@ import install from './install'
 import createMatcher from './create-matcher'
 import HashHistory from './history/HashHistory'
 class VueRouter {
-  constructor(options) {
+  constructor (options) {
     // 创建匹配器包含两个方法 addRoutes match
     this.matcher = createMatcher(options.routes)
     // 初始化真正的路由
     this.history = new HashHistory(this)
   }
 
-  match(...args) {
+  match (...args) {
     return this.matcher.match(...args)
   }
 
-  push(to) {
+  push (to) {
     this.history.transitionTo(to, () => {
       window.location.hash = to
     })
   }
 
-  beforeEach(fn) {
+  beforeEach (fn) {
     this.history.beforeEachs.push(fn)
   }
 
-  init(app) {
+  init (app) {
     const history = this.history
     const setupHistoryListener = () => {
       history.setupListener()

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import MessageComponent from './Message.vue'
+
 const getInstance = () => {
   const vm = new Vue({
     render: h => h(MessageComponent)

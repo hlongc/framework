@@ -1,5 +1,4 @@
 
-
 // let obj = {
 //   a: 1
 // }
@@ -26,7 +25,6 @@
 //   add
 // }
 
-
 // const now = Date.now()
 // const outdate = new Date(now + 1000 * 60).toGMTString()
 // document.cookie = `test=xixi;expires=${outdate}`
@@ -45,12 +43,12 @@ const fs = require('fs')
 const path = require('path')
 const vm = require('vm')
 
-function Module(id) {
+function Module (id) {
   this.id = id
   this.exports = {}
 }
 
-Module.prototype.load = function() {
+Module.prototype.load = function () {
   const ext = path.extname(this.id)
   Module.extension[ext](this) // 处理对应的后缀
 }
@@ -62,7 +60,7 @@ Module.wrapper = [
   `})`
 ]
 Module.extension = {
-  '.js'(module) {
+  '.js' (module) {
     const content = fs.readFileSync(module.id, 'utf8') // 取出文件的代码
     const fnStr = Module.wrapper[0] + content + Module.wrapper[1] // 拼接包裹函数
     const fn = vm.runInThisContext(fnStr) // 用包裹函数生成真正的函数
@@ -70,12 +68,12 @@ Module.extension = {
     // 改变this并执行函数
     fn.call(module.exports, module.exports, req, module, __dirname, module.id)
   },
-  '.json'(module) {
+  '.json' (module) {
     const json = fs.readFileSync(module.id, 'utf8')
     module.exports = json
   }
 }
-Module._resolveFileName = function(filename) {
+Module._resolveFileName = function (filename) {
   const absPath = path.resolve(__dirname, filename)
   const isExist = fs.existsSync(absPath) // 判断当前文件是否存在
   if (isExist) return absPath
@@ -89,7 +87,7 @@ Module._resolveFileName = function(filename) {
   throw new Error(`${filename} is no exist`)
 }
 
-function req(file) {
+function req (file) {
   const filename = Module._resolveFileName(file) // 解析路径
   const module = new Module(filename) // 创建模块
   module.load() // 加载模块

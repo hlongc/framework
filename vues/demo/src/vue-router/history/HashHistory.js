@@ -1,19 +1,19 @@
 import History from './base'
 
-function ensureSlash() {
+function ensureSlash () {
   if (window.location.hash) return
   window.location.hash = '/'
 }
 
 class HashHistory extends History {
-  constructor(router) {
+  constructor (router) {
     super(router)
     this.router = router
     // 第一次默认跳转hash
     ensureSlash()
   }
 
-  getCurrentPath() {
+  getCurrentPath () {
     return window.location.hash.slice(1)
   }
 }

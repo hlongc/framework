@@ -2,7 +2,7 @@ import RouterView from './components/router-view'
 import RouterLink from './components/router-link'
 let Vue
 
-export default function install(_Vue) {
+export default function install (_Vue) {
   Vue = _Vue
   Vue.mixin({
     beforeCreate () {
@@ -21,13 +21,13 @@ export default function install(_Vue) {
   })
 
   Object.defineProperty(Vue.prototype, '$route', {
-    get() {
+    get () {
       return this._routerRoot._route
     }
   })
 
   Object.defineProperty(Vue.prototype, '$router', {
-    get() {
+    get () {
       return this._routerRoot._router
     }
   })
