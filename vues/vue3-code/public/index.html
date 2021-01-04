@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/dist/bundle.js"></script>
+  <!-- <script src="/node_modules//@vue/reactivity/dist/reactivity.global.js"></script> -->
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const { reactive, effect } = VueReactivity
+    const data = reactive({
+      name: 'hlongc',
+      age: 25,
+      test: {
+        a: 1,
+        b: 2
+      },
+      arr: [1, 2, 3, 4, 5]
+    })
+    // console.log(data.test)
+    // data.arr.push(3)
+    effect(() => {
+      root.innerHTML = data.arr[3]
+    })
+    setTimeout(() => {
+      data.arr.length = 2
+    }, 3000)
+  </script>
+</body>
+</html>
