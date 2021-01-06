@@ -10,7 +10,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const { reactive, effect, computed } = VueReactivity
+    const { reactive, effect, computed, ref } = VueReactivity
     const data = reactive({
       name: 'hlongc',
       age: 25,
@@ -28,12 +28,17 @@
       return data.salary * 0.05
     })
     console.log(tax)
+    const count = ref(0)
     effect(() => {
       root.innerHTML = `姓名：${data.name}, 税收：${tax.value}`
     })
+    effect(() => {
+      console.log(`count: ${count.value}`)
+      console.log(count)
+    })
     
     setTimeout(() => {
-      data.salary = 6000
+      count.value++
     }, 3000)
   </script>
 </body>

@@ -16,6 +16,7 @@ class ComputedRefImpl {
     this.effect = effect(getter, {
       lazy: true, // 表示当前是计算属性的effect
       scheduler: () => { // 保证this指向当前实例而不是这个对象
+        this._dirty = true // 依赖的属性发生了改变
         trigger(this, TriggerTypes.SET, 'value') // 当计算属性依赖的属性发生变化时，需要让计算属性外层的effect重新执行
       }
     })
@@ -24,8 +25,11 @@ class ComputedRefImpl {
     this._setter(value)
   }
   get value(): any {
-    this._value = this.effect() // 执行用户传入的getter函数即可
-    track(this, 'value') // 取值的时候，对计算属性外层的effect进行收集
+    if (this._dirty) { // 脏检查，如果所依赖的属性发生了改变才执行
+      this._value = this.effect() // 执行用户传入的getter函数即可
+      track(this, 'value') // 取值的时候，对计算属性外层的effect进行收集
+      this._dirty = false
+    }
     return this._value
   }
 }
