@@ -10,7 +10,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const { reactive, effect } = VueReactivity
+    const { reactive, effect, computed } = VueReactivity
     const data = reactive({
       name: 'hlongc',
       age: 25,
@@ -18,15 +18,22 @@
         a: 1,
         b: 2
       },
-      arr: [1, 2, 3, 4, 5]
+      arr: [1, 2, 3, 4, 5],
+      salary: 1000
     })
     // console.log(data.test)
     // data.arr.push(3)
-    effect(() => {
-      root.innerHTML = data.arr[3]
+    const tax = computed(() => {
+      console.log('tax')
+      return data.salary * 0.05
     })
+    console.log(tax)
+    effect(() => {
+      root.innerHTML = `姓名：${data.name}, 税收：${tax.value}`
+    })
+    
     setTimeout(() => {
-      data.arr.length = 2
+      data.salary = 6000
     }, 3000)
   </script>
 </body>

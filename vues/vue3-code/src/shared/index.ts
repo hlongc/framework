@@ -12,3 +12,7 @@ export const hasOwn = (target: object, key: string | symbol): key is keyof typeo
 export const hasChanged = (newVal: any, oldVal: any): boolean => {
   return newVal !== oldVal && (newVal === newVal || oldVal === oldVal)
 }
+
+export const isFunction = (val: any): val is Function => typeof val === 'function'
+
+export const noop = () => {}

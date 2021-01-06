@@ -1,7 +1,7 @@
 import { hasChanged, hasOwn, isObject } from '../shared'
 import { effectStack } from './effect'
 import { reactive } from './reactive'
-import { track, trigger, Types } from './effect'
+import { track, trigger, TriggerTypes } from './effect'
 
 export const mutableHandler = {
   get(target: object, key: string | symbol, recevier: object): any {
@@ -18,9 +18,9 @@ export const mutableHandler = {
     // 数组push时，先增加新值，然后自动修改length，所以屏蔽重复的length修改
     const ret = Reflect.set(target, key, value, recevier)
     if (!hasKey) {
-      trigger(target, Types.ADD, key, value) // 新增
+      trigger(target, TriggerTypes.ADD, key, value) // 新增
     } else if (hasChanged(oldValue, value)) {
-      trigger(target, Types.SET, key, value) // 修改
+      trigger(target, TriggerTypes.SET, key, value) // 修改
     }
     effectStack.forEach(effect => effect())
     return ret
