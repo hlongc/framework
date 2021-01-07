@@ -8,7 +8,7 @@ export default {
   output: {
     file: path.resolve(__dirname, 'dist/bundle.js'), // 输出文件
     format: 'umd',
-    name: 'VueReactivity',
+    name: 'Vue',
     sourcemap: true,
   },
   plugins: [

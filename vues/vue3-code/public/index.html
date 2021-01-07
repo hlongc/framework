@@ -10,7 +10,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const { reactive, effect, computed, ref } = VueReactivity
+    const { reactive, effect, computed, ref, toRefs } = Vue
     const data = reactive({
       name: 'hlongc',
       age: 25,
@@ -34,11 +34,15 @@
     })
     effect(() => {
       console.log(`count: ${count.value}`)
-      console.log(count)
     })
-    
+    const { name } = toRefs(data)
+    console.log(toRefs(data))
+    effect(() => {
+      console.log(name.value, 1)
+    })
     setTimeout(() => {
       count.value++
+      name.value = 'hulongchao'
     }, 3000)
   </script>
 </body>
