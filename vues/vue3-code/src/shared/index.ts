@@ -1,7 +1,3 @@
-export const isObject = (target: unknown): target is Object => {
-  return typeof target === 'object' && target !== null
-}
-
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
 export const hasOwn = (target: object, key: string | symbol): key is keyof typeof target => {
@@ -14,5 +10,13 @@ export const hasChanged = (newVal: any, oldVal: any): boolean => {
 }
 
 export const isFunction = (val: any): val is Function => typeof val === 'function'
+
+export const isObject = (val: unknown): val is Object => {
+  return typeof val === 'object' && val !== null
+}
+
+export const isString = (val: unknown): val is string => typeof val === 'string'
+
+export const isArray = (val: unknown): val is Array<any> => Array.isArray(val)
 
 export const noop = () => {}

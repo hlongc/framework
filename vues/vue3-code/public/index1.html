@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/dist/bundle.js"></script>
+  <!-- <script src="/node_modules//@vue/reactivity/dist/reactivity.global.js"></script> -->
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const { reactive, effect, computed, ref, toRefs } = Vue
+    const data = reactive({
+      name: 'hlongc',
+      age: 25,
+      test: {
+        a: 1,
+        b: 2
+      },
+      arr: [1, 2, 3, 4, 5],
+      salary: 1000
+    })
+    // console.log(data.test)
+    // data.arr.push(3)
+    const tax = computed(() => {
+      console.log('tax')
+      return data.salary * 0.05
+    })
+    console.log(tax)
+    const count = ref(0)
+    effect(() => {
+      root.innerHTML = `姓名：${data.name}, 税收：${tax.value}`
+    })
+    effect(() => {
+      console.log(`count: ${count.value}`)
+    })
+    const { name } = toRefs(data)
+    console.log(toRefs(data))
+    effect(() => {
+      console.log(name.value, 1)
+    })
+    setTimeout(() => {
+      count.value++
+      name.value = 'hulongchao'
+    }, 3000)
+  </script>
+</body>
+</html>

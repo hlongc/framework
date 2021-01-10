@@ -5,45 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <script src="/dist/bundle.js"></script>
-  <!-- <script src="/node_modules//@vue/reactivity/dist/reactivity.global.js"></script> -->
+  <!-- <script src="/node_modules/vue/dist/vue.global.js"></script> -->
 </head>
 <body>
   <div id="root"></div>
   <script>
-    const { reactive, effect, computed, ref, toRefs } = Vue
-    const data = reactive({
-      name: 'hlongc',
-      age: 25,
-      test: {
-        a: 1,
-        b: 2
-      },
-      arr: [1, 2, 3, 4, 5],
-      salary: 1000
-    })
-    // console.log(data.test)
-    // data.arr.push(3)
-    const tax = computed(() => {
-      console.log('tax')
-      return data.salary * 0.05
-    })
-    console.log(tax)
-    const count = ref(0)
-    effect(() => {
-      root.innerHTML = `姓名：${data.name}, 税收：${tax.value}`
-    })
-    effect(() => {
-      console.log(`count: ${count.value}`)
-    })
-    const { name } = toRefs(data)
-    console.log(toRefs(data))
-    effect(() => {
-      console.log(name.value, 1)
-    })
-    setTimeout(() => {
-      count.value++
-      name.value = 'hulongchao'
-    }, 3000)
+    const { createApp, h, reactive } = Vue
+    const App = {
+      setup() {
+        // return { a: 1 }
+        const data = reactive({
+          flag: true
+        })
+        setTimeout(() => {
+          data.flag = false
+        }, 3000)
+        return () => data.flag 
+        ? h('h1', { style: { color: 'blue', 'textDecoration': 'underline' } }, [
+          h('div', { key: 'A' }, '1'),
+          h('div', { key: 'B' }, '2'),
+          h('div', { key: 'C' }, '3'),
+          h('div', { key: 'E' }, '7'),
+          h('div', { key: 'F' }, '8')
+        ]) 
+        : h('h1', { style: { color: 'green', 'backgroundColor': 'yellow' } }, [
+          h('div', { key: 'A' }, '1'),
+          h('div', { key: 'B' }, '2'),
+          h('div', { key: 'C' }, '3')
+        ])
+      }
+    }
+    const app = createApp(App)
+    app.mount('#root')
   </script>
 </body>
 </html>

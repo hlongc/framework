@@ -21,4 +21,5 @@ export function createApp(rootComponent: any) {
     container.innerHTML = ''
     mount(container)
   }
+  return app
 }
