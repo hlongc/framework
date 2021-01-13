@@ -7,7 +7,7 @@ import { effect } from '../reactivity'
 
 export interface OptionsType {
   createElement: (type: any) => HTMLElement;
-  insert: (child: HTMLElement, parent: HTMLElement, anchor: null | HTMLElement) => void;
+  insert: (child: HTMLElement, parent: HTMLElement, anchor?: null | HTMLElement) => void;
   remove: (child: HTMLElement) => void;
   setElementText: (child: HTMLElement, text: string) => void;
   createTextElement: (content: string) => Text;
@@ -31,8 +31,9 @@ export function createRenderer(nodeOps: OptionsType) {
    * @param prev old vnode 
    * @param next new vnode
    * @param el dom container
+   * @param anchor 锚点
    */
-  const processElement = (prev: any, next: VNodeProps, el: HTMLElement, anchor: HTMLElement | null) => {
+  const processElement = (prev: any, next: VNodeProps, el: HTMLElement, anchor: HTMLElement | null = null) => {
     if (!prev) { // 不存在prev表示是第一次挂载
       mountElement(next, el, anchor)
     } else {
@@ -68,9 +69,10 @@ export function createRenderer(nodeOps: OptionsType) {
    * @param prev 之前的虚拟节点
    * @param next 新的虚拟节点
    * @param el dom容器
+   * @param anchor 锚点
    */
-  const patch = (prev: VNodeProps | null, next: VNodeProps, el: HTMLElement, anchor: HTMLElement | null) => {
-    anchor = anchor || null
+
+  const patch = (prev: VNodeProps | null, next: VNodeProps, el: HTMLElement, anchor: HTMLElement | null = null) => {
     if (prev && prev.el && !isSameVNodeType(prev, next)) { // 如果前后类型不同，那么删除直接重新创建
       hostRemove(prev.el)
       prev = null
@@ -209,7 +211,7 @@ export function createRenderer(nodeOps: OptionsType) {
    * @param vnode 虚拟节点
    * @param container 真实dom
    */
-  const mountElement = (vnode: VNodeProps, container: HTMLElement, anchor: HTMLElement |null) => {
+  const mountElement = (vnode: VNodeProps, container: HTMLElement, anchor: HTMLElement |null = null) => {
     const { shapeFlag, children, props, type } = vnode
     // 创建真实元素
     const el = vnode.el = hostCreateElement(type)

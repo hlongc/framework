@@ -1,6 +1,6 @@
 export interface NodeOpsProps {
   createElement: (type: any) => HTMLElement;
-  insert: (child: HTMLElement, parent: HTMLElement, anchor: null | HTMLElement) => void;
+  insert: (child: HTMLElement, parent: HTMLElement, anchor?: null | HTMLElement) => void;
   remove: (child: HTMLElement) => void;
   setElementText: (child: HTMLElement, text: string) => void;
   createTextElement: (content: string) => Text;

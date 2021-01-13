@@ -10,10 +10,9 @@
 <body>
   <div id="root"></div>
   <script>
-    const { createApp, h, reactive } = Vue
+    const { createApp, h, reactive, effect } = Vue
     const App = {
       setup() {
-        // return { a: 1 }
         const data = reactive({
           flag: true
         })
