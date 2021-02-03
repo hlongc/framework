@@ -12,15 +12,15 @@ class BaseProvider<T> {
   provide: Type<T> | StringToken;
 }
 
-class ClassProvider<T> extends BaseProvider<T> {
+interface ClassProvider<T> extends BaseProvider<T> {
   useClass: Type<T>;
 }
 
-class ValueProvider<T> extends BaseProvider<T> {
+interface ValueProvider<T> extends BaseProvider<T> {
   useValue: T;
 }
 
-class FactoryProvider<T> extends BaseProvider<T> {
+interface FactoryProvider<T> extends BaseProvider<T> {
   useFactory: () => T;
 }
 
@@ -28,3 +28,10 @@ export type ProviderType<T> =
   | ClassProvider<T>
   | ValueProvider<T>
   | FactoryProvider<T>;
+
+// 自定义类型保护
+export function isClassProvider<T>(
+  provider: BaseProvider<T>,
+): provider is ClassProvider<T> {
+  return (provider as any).useClass !== undefined;
+}
