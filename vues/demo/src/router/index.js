@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Router from '@/vue-router'
+import Router from 'vue-router'
 import Home from '@/components/HelloWorld'
 import NotFound from '@/components/404'
 import Example from '@/components/Example'
@@ -7,6 +7,7 @@ import Drag from '@/components/Drag.vue'
 import Setting from '@/components/setting.vue'
 import User from '@/components/UserMange.vue'
 import Message from '@/components/MesMange.vue'
+import VueContainer from '@/components/Vue.vue'
 
 Vue.use(Router)
 
@@ -37,7 +38,26 @@ const routes = [
       component: Message,
       meta: { title: '短信管理' }
     }]
-  },
+	},
+	{
+		path: '/vue',
+		redirect: '/vue/home'
+	},
+	{
+		path: '/vue/home',
+		name: 'third',
+		component: VueContainer
+	},
+	{
+		path: '/vue/about',
+		name: 'third',
+		component: VueContainer
+	},
+	{
+		path: '/vue/user',
+		name: 'third',
+		component: VueContainer
+	},
   {
     path: '*',
     component: NotFound
