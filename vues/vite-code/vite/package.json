@@ -1,0 +1,13 @@
+{
+  "name": "myvite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "bin": "./bin/www.js",
+  "license": "MIT",
+  "dependencies": {
+    "es-module-lexer": "^0.3.26",
+    "koa": "^2.13.1",
+    "koa-static": "^5.0.0",
+    "magic-string": "^0.25.7"
+  }
+}
