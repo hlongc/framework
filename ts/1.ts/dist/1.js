@@ -1,11 +1,11 @@
 "use strict";
-var names = 'hello1';
-var age = 1234567890;
-var isMerried = false;
-var arr1 = ['1', '2'];
-var arr2 = [1, 2, 3];
+const names = 'hello1';
+let age = 1234567890;
+let isMerried = false;
+const arr1 = ['1', '2'];
+const arr2 = [1, 2, 3];
 // 元祖 数量和类型都固定的数组
-var person = ['hlongc', 20];
+const person = ['hlongc', 20];
 var Gender;
 (function (Gender) {
     Gender[Gender["BOY"] = 0] = "BOY";
@@ -16,10 +16,10 @@ function greet(name) {
     console.log(name);
 }
 greet('hlc');
-var demo = 'hlc';
-var name123 = 12345;
+let demo = 'hlc';
+const name123 = 12345;
 console.log(name123);
-var getUserName = function (firstname, lastname) {
+const getUserName = (firstname, lastname) => {
     return firstname + lastname;
 };
 console.log(getUserName('hu', 'longchao'));
