@@ -1,4 +1,4 @@
-const str = '我是{{ name }},今年{{ age }}岁,爱好{{ hobby }}'
+const str = '我是{{name}},今年{{age }}岁,爱好{{  hobby }}'
 
 const info = {
   name: 'hlc',
@@ -7,9 +7,9 @@ const info = {
 }
 
 function render(template, data) {
-  const reg = /\{\{(\s+\w+\s+)\}\}/g
+  const reg = /\{\{\s*(\w+)\s*\}\}/g
   return template.replace(reg, function() {
-    return data[arguments[1].trim()]
+    return data[arguments[1]]
   })
 }
 

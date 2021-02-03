@@ -198,5 +198,5 @@ Promise.race([1, 2, Promise.resolve('嘻嘻')]).then(res => {
 })
 
 
-export default Promise
+// export default Promise
 

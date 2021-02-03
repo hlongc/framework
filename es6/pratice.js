@@ -1,270 +1,309 @@
-Object.create = function(prototype) {
-  function F() {}
-  F.prototype = prototype
-  return new F()
-}
+Function.prototype.call = function(context, ...args) {
+  context = context || global || window;
+  if (['string', 'number', 'boolean'].includes(typeof context)) {
+    context = new context.constructor(context);
+  }
+  const fn = Symbol();
+  context[fn] = this;
+  const ret = context[fn](...args);
+  delete context[fn];
+  return ret;
+};
 
 Function.prototype.apply = function(context, args) {
-  context = context || global || window
+  context = context || global || window;
   if (['string', 'number', 'boolean'].includes(typeof context)) {
-    context = new context.constructor(context)
+    context = new context.constructor(context);
   }
-  const fn = Symbol()
-  context[fn] = this
-  const res = context[fn](...args)
-  delete context[fn]
-  return res
-}
+  const fn = Symbol();
+  context[fn] = this;
+  const ret = context[fn](...args);
+  delete context[fn];
+  return ret;
+};
 
-Function.prototype.call = function(context, ...args) {
-  context = context || global || window
-  if (['string', 'number', 'boolean'].includes(typeof context)) {
-    context = new context.constructor(context)
+Object.create = function(prototype) {
+  function F() {}
+  F.prototype = prototype;
+  return new F();
+};
+
+Function.prototype.bind = function(Othis, ...outerArgs) {
+  const F = this;
+  function fBound(...innerArgs) {
+    return F.call(this instanceof F ? this : Othis, ...outerArgs, ...innerArgs);
   }
-  const fn = Symbol()
-  context[fn] = this
-  const res = context[fn](...args)
-  delete context[fn]
-  return res
+  fBound.prototype = Object.create(F.prototype);
+  return fBound;
+};
+
+function _new(Clazz, ...args) {
+  const obj = Object.create(Clazz.prototype);
+  const ret = Clazz.call(obj, ...args);
+  return (typeof ret === 'object' && ret !== null) || typeof ret === 'function'
+    ? ret
+    : obj;
 }
 
-Function.prototype.bind = function(context, ...innerArgs) {
-  const F = this
-  function fBound(...outerArgs) {
-    return F.call(this instanceof F ? this : context, ...innerArgs, ...outerArgs)
+function _instanceOf(ins, Clazz) {
+  let proto = ins.__proto__;
+  let prototype = Clazz.prototype;
+  while (true) {
+    if (proto === null) return false;
+    if (prototype === null) return false;
+    if (proto === prototype) return true;
+    proto = proto.__proto__;
   }
-  fBound.prototype = Object.create(F.prototype)
-  return fBound
 }
 
-const PENDING = 'PENDING'
-const FULFILLED = 'FULFILLED'
-const REJECTED = 'REJECTED'
+const obj = { name: 'hlc' };
+const obj1 = { name: 'hlongc' };
+const obj2 = { name: 'hulongchao' };
 
-
-const isType = (val, type) => {
-  return Object.prototype.toString.call(val).slice(8, -1) === type
+function foo(age) {
+  console.log(this.name, age);
 }
 
-const isPromise = x => {
-  if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
-    return typeof x.then === 'function' && typeof x.catch === 'function'
+foo.call(obj, 24);
+foo.apply(obj, [24]);
+foo
+  .bind(obj)
+  .bind(obj1)
+  .bind(obj2)(24);
+
+function Point(x, y) {
+  this.x = x;
+  this.y = y;
+}
+
+Point.prototype.print = function() {
+  console.log(this.x, this.y);
+};
+
+const P = Point.bind(obj, 2);
+const point = new P(3);
+point.print();
+console.log(point instanceof P);
+console.log(point instanceof Point);
+console.log(_instanceOf(point, P));
+console.log(_instanceOf(point, Point));
+
+const PENDING = 'PENDING';
+const FULFILLED = 'FULFILLED';
+const REJECTED = 'REJECTED';
+
+const isPromise = val => {
+  if ((typeof val === 'object' && val !== null) || typeof val === 'function') {
+    if (typeof val.then === 'function' && typeof val.catch === 'function') {
+      return true;
+    }
+  } else {
+    return false;
   }
-  return false
-}
+};
 
 const resolvePromise = (promise2, x, resolve, reject) => {
   if (promise2 === x) {
-    throw new Error('循环引用')
+    throw new Error('循环引用');
   }
   if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
-    let call
+    let call;
     try {
-      const then = x.then
+      const then = x.then;
       if (typeof then === 'function') {
-        then.call(x, r => {
-          if (call) return
-          call = true
-          resolvePromise(promise2, r, resolve, reject)
-        }, r => {
-          if (call) return
-          call = true
-          reject(r)
-        })
+        then.call(
+          x,
+          y => {
+            if (call) return;
+            call = true;
+            resolvePromise(promise2, y, resolve, reject);
+          },
+          r => {
+            if (call) return;
+            call = true;
+            reject(r);
+          }
+        );
       } else {
-        if (call) return
-        call = true
-        resolve(x)
+        if (call) return;
+        call = true;
+        resolve(x);
       }
     } catch (e) {
-      if (call) return
-      call = true
-      reject(e)
+      if (call) return;
+      call = true;
+      reject(e);
     }
   } else {
-    resolve(x)
+    resolve(x);
   }
-}
+};
 
 class Promise {
   constructor(executor) {
-    this.status = PENDING
-    this.value = undefined
-    this.reason = undefined
-    this.resolveCallbackList = []
-    this.rejectCallbackList = []
+    this.status = PENDING;
+    this.value = undefined;
+    this.reason = undefined;
+    this.rejectCallbacks = [];
+    this.resolveCallbacks = [];
 
     const reject = reason => {
       if (this.status === PENDING) {
-        this.status = REJECTED
-        this.reason = reason
-        this.rejectCallbackList.forEach(fn => fn())
+        this.status = REJECTED;
+        this.reason = reason;
+        this.rejectCallbacks.forEach(fn => fn());
       }
-    }
-
-    const resolve = data => {
-      if (isPromise(data)) {
-        return data.then(resolve, reject)
+    };
+    const resolve = value => {
+      if (isPromise(value)) {
+        return value.then(resolve, reject);
       }
       if (this.status === PENDING) {
-        this.status = FULFILLED
-        this.value = data
-        this.resolveCallbackList.forEach(fn => fn())
+        this.status = FULFILLED;
+        this.value = value;
+        this.resolveCallbacks.forEach(fn => fn());
       }
-    }
+    };
 
     try {
-      executor(resolve, reject)
+      executor(resolve, reject);
     } catch (e) {
-      reject(e)
+      reject(e);
     }
   }
 
-  static resolve(data) {
-    return new Promise(resolve => resolve(data))
+  static resolve(value) {
+    return new Promise(resolve => resolve(value));
   }
-
-  static reject(data) {
-    return new Promise((_resolve, reject) => reject(data))
+  static reject(reason) {
+    return new Promise((_resolve, reject) => reject(reason));
   }
-
-  static all(promises) {
-    return new Promise((resolve, reject) => {
-      if (promises.length === 0) return resolve()
-      let i = 0
-      const result = []
-      const processData = (item, index) => {
-        result[index] = item
-        if (++i === promises.length) return resolve(result)
-      }
-
-      promises.forEach((val, index) => {
-        if (isPromise(val)) {
-          val.then(x => processData(x, index), reject)
-        } else {
-          processData(val, index)
-        }
-      })
-    })
-  }
-
   static race(promises) {
     return new Promise((resolve, reject) => {
-      if (promises.length === 0) return resolve()
-      promises.forEach(val => {
-        if (isPromise(val)) {
-          val.then(resolve, reject)
-        } else {
-          resolve(val)
-        }
-      })
-    })
+      if (Array.isArray(promises)) {
+        promises.forEach(item => {
+          if (isPromise(item)) {
+            item.then(resolve, reject);
+          } else {
+            resolve(item);
+          }
+        });
+      } else {
+        throw new Error(`${promises} cannot iterater`);
+      }
+    });
   }
-
+  static all(promises) {
+    return new Promise((resolve, reject) => {
+      if (Array.isArray(promises)) {
+        const ret = [];
+        let i = 0;
+        const processData = (item, index) => {
+          ret[index] = item;
+          if (++i === promises.length) {
+            return resolve(ret);
+          }
+        };
+        promises.forEach((cur, index) => {
+          if (isPromise(cur)) {
+            cur.then(data => processData(data, index), reject);
+          } else {
+            processData(cur, index);
+          }
+        });
+      } else {
+        throw new Error(`${promises} cannot iterater`);
+      }
+    });
+  }
   then(onfulfilled, onrejected) {
-    onfulfilled = isType(onfulfilled, 'Function') ? onfulfilled : x => x
-    onrejected = isType(onrejected, 'Function') ? onrejected : e => { throw e }
-
+    onfulfilled = typeof onfulfilled === 'function' ? onfulfilled : r => r;
+    onrejected =
+      typeof onrejected === 'function'
+        ? onrejected
+        : e => {
+            throw e;
+          };
     const promise2 = new Promise((resolve, reject) => {
       if (this.status === FULFILLED) {
         setTimeout(() => {
           try {
-            const x = onfulfilled(this.value)
-            resolvePromise(promise2, x, resolve, reject)
+            const x = onfulfilled(this.value);
+            resolvePromise(promise2, x, resolve, reject);
           } catch (e) {
-            reject(e)
+            reject(e);
           }
-        })
+        });
       }
-
       if (this.status === REJECTED) {
         setTimeout(() => {
           try {
-            const x = onrejected(this.reason)
-            resolvePromise(promise2, x, resolve, reject)
+            const x = onrejected(this.reason);
+            resolvePromise(promise2, x, resolve, reject);
           } catch (e) {
-            reject(e)
+            reject(e);
           }
-        })
+        });
       }
-
       if (this.status === PENDING) {
-        this.resolveCallbackList.push(() => {
+        this.resolveCallbacks.push(() => {
           setTimeout(() => {
             try {
-              const x = onfulfilled(this.value)
-              resolvePromise(promise2, x, resolve, reject)
+              const x = onfulfilled(this.value);
+              resolvePromise(promise2, x, resolve, reject);
             } catch (e) {
-              reject(e)
+              reject(e);
             }
-          })
-        })
-
-        this.rejectCallbackList.push(() => {
+          });
+        });
+        this.rejectCallbacks.push(() => {
           setTimeout(() => {
             try {
-              const x = onrejected(this.reason)
-              resolvePromise(promise2, x, resolve, reject)
+              const x = onrejected(this.reason);
+              resolvePromise(promise2, x, resolve, reject);
             } catch (e) {
-              reject(e)
+              reject(e);
             }
-          })
-        })
+          });
+        });
       }
-    })
-
-    return promise2
+    });
+    return promise2;
   }
-
-  catch(fn) {
-    return this.then(null, fn)
+  catch(cb) {
+    return this.then(null, cb);
   }
-
-  finally(fn) {
+  finally(cb) {
     return this.then(
-      x => Promise.resolve(fn()).then(() => x),
-      e => Promise.resolve(fn()).then(() => { throw e })
-    )
+      r => Promise.resolve(cb()).then(() => r),
+      e =>
+        Promise.resolve(cb()).then(() => {
+          throw e;
+        })
+    );
   }
 }
 
-function a(age) {
-  console.log(this.name + ' ' + age)
-}
+Promise.resolve(123)
+  .finally(() => {
+    console.log('finally');
+  })
+  .then(x => {
+    console.log(x);
+  });
 
-const obj = { name: 'hlc' }
-a.call(obj, 24)
+const sleep = s => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(`sleep ${s}`);
+    }, s);
+  });
+};
 
-function foo() { console.log('foo') }
-function bar() { console.log('bar') }
-foo.call.call.call(bar) // 相当于调用call.call(bar) => bar.call() => bar()
+Promise.race([sleep(2000), 3, 4]).then(data => {
+  console.log(data);
+});
 
-const obj1 = { name: 'obj1' }
-const obj2 = { name: 'obj2' }
-const obj3 = { name: 'obj3' }
-const obj4 = { name: 'obj4' }
-const obj5 = { name: 'obj5' }
-const obj6 = { name: 'obj6' }
-
-function test() {
-  console.log(this.name)
-}
-
-test.bind(obj1).bind(obj2).bind(obj3).bind(obj4).bind(obj5).bind(obj6)()
-
-
-function Point(x, y) {
-  this.x = x
-  this.y = y
-}
-
-Point.prototype.print = function() {
-  console.log(this.x + ',' + this.y)
-}
-
-const Ypoint = Point.bind(obj, 1)
-const point = new Ypoint(2)
-console.log(point)
-point.print()
-console.log(point instanceof Point)
-console.log(point instanceof Ypoint)
+Promise.all([sleep(1000), 3, 4]).then(data => {
+  console.log(data);
+});
