@@ -34,7 +34,11 @@ type Partial<T> = { [K in keyof T]?: T[K] | undefined }
 // 深度可选，进行递归  取出类型中的key依次循环
 type DeepPartial<T> = {[K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K]}
 
+// 从T中挑选出K
 type Pick<T, K extends keyof T> = {[R in K]: T[R]}
+
+// 忽略T中的K属性
+type Omit<T extends object, K extends keyof any> = Pick<T, Exclude<keyof T, K>>
 
 type Record<K extends keyof any, T> = { [P in K]: T; }
 
@@ -110,6 +114,21 @@ function createArray(val: string | number): string[] | number[] {
 
 createArray(1)
 
+const obj1 = { a: 1, b: 2, c: 3 }
+function getKeys<T extends object, K extends keyof T>(o: T, k: K): T[K] {
+  return o[k]
+}
+console.log(getKeys(obj1, 'a'))
+
+interface Room {
+  width: number;
+  height: number;
+  light: number;
+}
+
+
+
+type OmitRoom = Omit<Room, 'width' | 'height'>
 
 
 export {}
