@@ -1,0 +1,17 @@
+$namespace: 'hu-';
+
+@mixin blockquote($block) {
+  // 全局变量,其他方法也可以使用
+  $blockname: $namespace + $block !global;
+  .#{$blockname} {
+    @content;
+  }
+}
+
+@mixin status($colorObj) {
+  @each $key, $value in $colorObj {
+    &.#{$blockname}-#{$key} {
+      background-color: $value;
+    }
+  }
+}

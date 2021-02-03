@@ -1,0 +1,39 @@
+@import './common/var';
+@import './mixins/mixin.scss';
+
+@include blockquote(carousel) {
+  width: 100%;
+  height: 100%;
+  .view-port {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    .dot-wrapper {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 100%;
+      height: 25px;
+      display: flex;
+      justify-content: center;
+      .dot {
+        display: inline-block;
+        width: 25px;
+        height: 25px;
+        border-radius: 100%;
+        margin-left: 5px;
+        text-align: center;
+        line-height: 25px;
+        font-size: 12px;
+        color: #fff;
+        background-color: rgba($color: #000000, $alpha: 0.3);
+        cursor: pointer;
+        &.active {
+          background-color: #fff;
+          color: #000;
+        }
+      }
+    }
+  }
+}

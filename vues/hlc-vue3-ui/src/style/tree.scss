@@ -1,0 +1,30 @@
+@import './common/var';
+@import './mixins/mixin.scss';
+
+@include blockquote(tree) {
+  position: relative;
+  background-color: #fff;
+  .hu-tree-node-label {
+    padding-left: 20px;
+    cursor: pointer;
+  }
+  .hu-tree-children {
+    padding-left: 30px;
+  }
+  .hu-tree-no-expand {
+    .hu-icon {
+      visibility: hidden;
+    }
+  }
+  .hu-tree-draggable {
+    user-select: none;
+    -webkit-user-drag: element;
+  }
+  .hu-tree-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: red;
+  }
+}

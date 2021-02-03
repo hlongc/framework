@@ -1,0 +1,67 @@
+@import './common/var';
+@import './mixins/mixin.scss';
+
+$colors: (
+  primary: $primary,
+  success: $success,
+  warning: $warning,
+  error: $error,
+  info: $info
+);
+
+$colors-active: (
+  primary: $primary-active,
+  success: $success-active,
+  warning: $warning-active,
+  error: $error-active,
+  info: $info-active
+);
+
+@include blockquote(button) {
+  @include status($colors);
+  display: inline-flex;
+  min-width: 80px;
+  padding: 0 15px;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  line-height: 40px;
+  font-size: $font-size;
+  outline: none;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  color: #fff;
+  vertical-align: middle;
+  &:active:not(:disabled),
+  &:hover:not(:disabled) {
+    @include status($colors-active);
+  }
+  &:disabled {
+    cursor: not-allowed;
+  }
+  .icon {
+    vertical-align: middle;
+    fill: #fff;
+    margin-right: 3px;
+  }
+  .prefix {
+    margin-left: 3px;
+    fill: #fff;
+  }
+  .suffix {
+    margin-right: 3px;
+    fill: #fff;
+  }
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .loading {
+    animation: rotate 2s infinite linear;
+  }
+}

@@ -1,0 +1,8 @@
+@import './common/var';
+@import './mixins/mixin.scss';
+
+@include blockquote(icon) {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
