@@ -8,7 +8,12 @@ function createDom(vnode) {
     return document.createTextNode(vnode)
   }
   const { type, props } = vnode
-  const dom = document.createElement(type) // 创建真实dom
+  let dom
+  if (typeof type === 'function') {
+    return mountFunctionComponent(vnode)
+  } else {
+    dom = document.createElement(type) // 创建真实dom
+  }
   updateProps(dom, props) // 更新样式
   const children = props.children
   // 子元素为文本
@@ -24,6 +29,12 @@ function createDom(vnode) {
   }
   vnode.dom = dom
   return dom
+}
+
+function mountFunctionComponent(vnode) {
+  const { type: FunctionComponent, props } = vnode
+  const returnVal = FunctionComponent(props)
+  return createDom(returnVal)
 }
 
 function reconcileChildren(parentDom, children) {

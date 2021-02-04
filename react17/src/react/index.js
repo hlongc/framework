@@ -6,7 +6,6 @@
  * @param {*} children 孩子节点
  */
 function createElement(type, config, children) {
-  console.log(type, config, children)
   delete config.__self
   delete config.__source
   const props = { ...config }

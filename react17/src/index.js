@@ -7,11 +7,18 @@ import { render } from './react-dom';
 // react17里面对虚拟dom进行了Object.freeze()操作
 
 
-const element = (
-  <div id="test" style={{ color: 'red', backgroundColor: 'yellow' }}>
-    hello
-    <span className="span" style={{ color: 'blue' }}>world</span>
-  </div>
-)
+function FunctionWelcome(props) {
+  return (
+    <div id="test" style={{ color: 'red', backgroundColor: 'yellow' }}>
+      hello { props.name }
+      <span className="span" style={{ color: 'blue' }}>world</span>
+      { props.children }
+    </div>
+  )
+}
 
-render(element, document.getElementById('root'))
+render((
+  <FunctionWelcome name="test">
+    next one
+  </FunctionWelcome>
+), document.getElementById('root'))
