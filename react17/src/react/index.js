@@ -1,3 +1,4 @@
+import Component from './Component'
 
 /**
  * 创建虚拟dom
@@ -17,7 +18,12 @@ function createElement(type, config, children) {
 }
 
 const React = {
-  createElement
+  createElement,
+  Component
+}
+
+export {
+  Component
 }
 
 export default React

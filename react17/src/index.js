@@ -17,8 +17,30 @@ function FunctionWelcome(props) {
   )
 }
 
+class ClazzComponent extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { num: 1 }
+  }
+
+  handleClick = () => {
+    this.setState({ num: this.state.num + 1 })
+  }
+
+  render() {
+    return (
+      <div>
+        <p>{this.state.num}</p>
+        <button onClick={ this.handleClick }>加</button>
+        { this.props.name }
+        { this.props.children }
+      </div>
+    )
+  }
+}
+
 render((
-  <FunctionWelcome name="test">
+  <ClazzComponent name="test">
     next one
-  </FunctionWelcome>
+  </ClazzComponent>
 ), document.getElementById('root'))

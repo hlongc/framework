@@ -3,14 +3,22 @@ export function render(vnode, container) {
   container.appendChild(dom)
 }
 
-function createDom(vnode) {
+/**
+ * 根据虚拟节点创建真实dom
+ * @param {*} vnode 虚拟节点
+ */
+export function createDom(vnode) {
   if (typeof vnode === 'number' || typeof vnode === 'string') {
     return document.createTextNode(vnode)
   }
   const { type, props } = vnode
   let dom
   if (typeof type === 'function') {
-    return mountFunctionComponent(vnode)
+    if (type.isReactComponent) {
+      return mountClassComponent(vnode)
+    } else {
+      return mountFunctionComponent(vnode)
+    }
   } else {
     dom = document.createElement(type) // 创建真实dom
   }
@@ -31,6 +39,22 @@ function createDom(vnode) {
   return dom
 }
 
+/**
+ * 挂载类组件
+ * @param {*} vnode 虚拟节点
+ */
+function mountClassComponent(vnode) {
+  const { type: ClassComponent, props } = vnode
+  const instance = new ClassComponent(props)
+  const returnVal = instance.render()
+  instance.dom = createDom(returnVal) // 把真实dom保存在当前的实例上
+  return instance.dom
+}
+
+/**
+ * 挂载函数组件
+ * @param {*} vnode 虚拟节点
+ */
 function mountFunctionComponent(vnode) {
   const { type: FunctionComponent, props } = vnode
   const returnVal = FunctionComponent(props)
@@ -52,7 +76,12 @@ function updateProps(dom, newProps) {
         dom.style[attr] = style[attr]
       }
     } else {
-      dom[key] = newProps[key]
+      if (key.startsWith('on')) { // 处理事件
+        // onClick => onclick
+        dom[key.toLocaleLowerCase()] = newProps[key]
+      } else {
+        dom[key] = newProps[key]
+      }
     }
   }
 }
