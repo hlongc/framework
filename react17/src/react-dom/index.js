@@ -1,3 +1,5 @@
+import { addEvent } from './event'
+
 export function render(vnode, container) {
   const dom = createDom(vnode)
   container.appendChild(dom)
@@ -78,7 +80,8 @@ function updateProps(dom, newProps) {
     } else {
       if (key.startsWith('on')) { // 处理事件
         // onClick => onclick
-        dom[key.toLocaleLowerCase()] = newProps[key]
+        // dom[key.toLocaleLowerCase()] = newProps[key]
+        addEvent(dom, key.toLocaleLowerCase(), newProps[key])
       } else {
         dom[key] = newProps[key]
       }

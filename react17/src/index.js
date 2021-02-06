@@ -1,5 +1,5 @@
-import React from './react'
-import { render } from './react-dom';
+import React from 'react'
+import { render } from 'react-dom';
 
 // react 17不在编译阶段依赖React这个包
 // <div></div> jsx不会在转换为React.createElement()而是调用jsx的包
@@ -20,16 +20,32 @@ function FunctionWelcome(props) {
 class ClazzComponent extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { num: 1 }
+    this.state = { num: 0 }
   }
 
-  handleClick = () => {
+  handleClick = (e) => {
     this.setState({ num: this.state.num + 1 })
+    console.log(this.state.num)
+    this.setState({ num: this.state.num + 1 })
+    console.log(this.state.num)
+    e.stopPropagation()
+    e.persist()
+    setTimeout(() => {
+      console.log(e)
+      this.setState({ num: this.state.num + 1 })
+      console.log(this.state.num)
+      this.setState({ num: this.state.num + 1 })
+      console.log(this.state.num)
+    }, 1000)
+  }
+
+  hanldeDivClick = () => {
+    console.log('div click')
   }
 
   render() {
     return (
-      <div>
+      <div onClick={ this.hanldeDivClick }>
         <p>{this.state.num}</p>
         <button onClick={ this.handleClick }>加</button>
         { this.props.name }
