@@ -1,4 +1,5 @@
 import Component from './Component'
+import { wrapVNode } from '../shared/utils'
 
 /**
  * 创建虚拟dom
@@ -7,23 +8,42 @@ import Component from './Component'
  * @param {*} children 孩子节点
  */
 function createElement(type, config, children) {
-  delete config.__self
-  delete config.__source
+  let key, ref
+  if (config) {
+    key = config.key
+    ref = config.ref || null
+    delete config.__self
+    delete config.__source
+    delete config.key
+    delete config.ref
+  }
   const props = { ...config }
-  props.children = arguments.length > 3 ? [].slice.call(arguments, 2) : children
+  if (children !== null || children !== undefined) {
+    props.children = arguments.length > 3 ? [].slice.call(arguments, 2).map(wrapVNode) : wrapVNode(children)  
+  } else {
+    props.children = null
+  }
   return {
     type,
-    props
+    props,
+    key,
+    ref
   }
+}
+
+function createRef() {
+  return { current: null }
 }
 
 const React = {
   createElement,
-  Component
+  Component,
+  createRef
 }
 
 export {
-  Component
+  Component,
+  createRef
 }
 
 export default React

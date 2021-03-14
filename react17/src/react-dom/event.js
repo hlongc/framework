@@ -42,6 +42,7 @@ function dispatchEvent(event) {
     syntheticEvent[key] = null
   }
   stopping = false
+  updateQueue.isBatchingUpdate = false
   updateQueue.batchUpdate()
 }
 

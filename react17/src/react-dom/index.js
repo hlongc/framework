@@ -1,21 +1,30 @@
 import { addEvent } from './event'
+import { runHooks, runGetDerivedStateFromProps } from '../shared/utils'
+import { REACT_TEXT } from '../shared/constant'
 
 export function render(vnode, container) {
   const dom = createDom(vnode)
   container.appendChild(dom)
+  // 组件挂载完成
+  runHooks(dom, 'componentDidMount')
 }
+
 
 /**
  * 根据虚拟节点创建真实dom
  * @param {*} vnode 虚拟节点
  */
 export function createDom(vnode) {
-  if (typeof vnode === 'number' || typeof vnode === 'string') {
-    return document.createTextNode(vnode)
-  }
-  const { type, props } = vnode
+  // debugger
+  const { type, props, ref } = vnode
   let dom
-  if (typeof type === 'function') {
+  if (type === REACT_TEXT) {
+    vnode.dom = document.createTextNode(props.content)
+    if (ref) {
+      ref.current = vnode.dom
+    }
+    return vnode.dom
+  } else if (typeof type === 'function') {
     if (type.isReactComponent) {
       return mountClassComponent(vnode)
     } else {
@@ -23,14 +32,14 @@ export function createDom(vnode) {
     }
   } else {
     dom = document.createElement(type) // 创建真实dom
+    if (ref) {
+      ref.current = dom
+    }
   }
-  updateProps(dom, props) // 更新样式
+  updateProps(dom, {}, props) // 更新样式
   const children = props.children
-  // 子元素为文本
-  if (typeof children === 'number' || typeof children === 'string') {
-    dom.textContent = children
-    // 子元素只有一个且未虚拟节点
-  } else if (typeof children === 'object' && children !== null && children.type) {
+  // 子元素只有一个且为虚拟节点，那就递归渲染孩子节点
+  if (typeof children === 'object' && children !== null && children.type) {
     render(children, dom)
   } else if (Array.isArray(children)) {
     reconcileChildren(dom, children)
@@ -48,9 +57,20 @@ export function createDom(vnode) {
 function mountClassComponent(vnode) {
   const { type: ClassComponent, props } = vnode
   const instance = new ClassComponent(props)
-  const returnVal = instance.render()
-  instance.dom = createDom(returnVal) // 把真实dom保存在当前的实例上
-  return instance.dom
+  instance.pendingState = instance.state
+  instance.pendingProps = props
+  // 组件即将挂载
+  // getDerivedStateFromProps在render之前执行
+  runGetDerivedStateFromProps(instance, instance.pendingProps, instance.pendingState)
+  const oldVdom = instance.render()
+  const dom = createDom(oldVdom)
+  vnode.instance = instance // 实例绑定到虚拟节点上面
+  dom.componentDidMount = instance.componentDidMount.bind(instance)
+  instance.oldVdom = oldVdom
+  instance.dom = dom
+  vnode.dom = dom // 把真实dom保存在当前的vnode上面
+  vnode.oldVdom = oldVdom // 当前组件产生的vdom
+  return dom
 }
 
 /**
@@ -60,6 +80,7 @@ function mountClassComponent(vnode) {
 function mountFunctionComponent(vnode) {
   const { type: FunctionComponent, props } = vnode
   const returnVal = FunctionComponent(props)
+  vnode.oldVdom = returnVal
   return createDom(returnVal)
 }
 
@@ -69,7 +90,7 @@ function reconcileChildren(parentDom, children) {
   })
 }
 
-function updateProps(dom, newProps) {
+export function updateProps(dom, oldProps,newProps) {
   for (const key in newProps) {
     if (key === 'children') continue
     if (key === 'style') {
