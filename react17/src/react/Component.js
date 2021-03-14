@@ -105,16 +105,16 @@ class Component {
   }
 
   forceUpdate() {
-    console.log('forceUpdate')
     runGetDerivedStateFromProps(this, this.props, this.state)
+    
     this.updateComponent()
   }
 
   updateComponent() {
-    // debugger
+    // 更新context的值
+    this.context = this.constructor.contextType !== undefined ? this.constructor.contextType.Provider._value : {}
     const newVdom = this.render()
     const oldVdom = this.oldVdom
-    // debugger
     const thirdArgument = runHooks(this, 'getSnapshotBeforeUpdate')
     this.oldVdom = compareTwoVdom(this.dom.parentNode, oldVdom, newVdom)
     // 更新完毕
@@ -198,6 +198,7 @@ function updateElement(oldVNode, newVNode) {
 function updateClassComponent(oldVNode, newVNode) {
   const instance = newVNode.instance = oldVNode.instance // 复用实例
   newVNode.oldVdom = oldVNode.oldVdom
+  instance.context = instance.constructor.contextType !== undefined ? instance.constructor.contextType.Provider._value : {}
   // 更新
   instance.pendingProps = newVNode.props
   instance.pendingState = instance.updater.getState()

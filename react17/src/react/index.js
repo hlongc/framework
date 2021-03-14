@@ -1,5 +1,6 @@
 import Component from './Component'
 import { wrapVNode } from '../shared/utils'
+import { createContext } from './Context'
 
 /**
  * 创建虚拟dom
@@ -38,12 +39,15 @@ function createRef() {
 const React = {
   createElement,
   Component,
-  createRef
+  createRef,
+  createContext
 }
 
 export {
+  createElement,
   Component,
-  createRef
+  createRef,
+  createContext
 }
 
 export default React

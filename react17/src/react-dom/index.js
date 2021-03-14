@@ -1,5 +1,5 @@
 import { addEvent } from './event'
-import { runHooks, runGetDerivedStateFromProps } from '../shared/utils'
+import { runHooks, runGetDerivedStateFromProps, isFunction } from '../shared/utils'
 import { REACT_TEXT } from '../shared/constant'
 
 export function render(vnode, container) {
@@ -57,6 +57,9 @@ export function createDom(vnode) {
 function mountClassComponent(vnode) {
   const { type: ClassComponent, props } = vnode
   const instance = new ClassComponent(props)
+  // context赋值
+  instance.context = ClassComponent.contextType !== undefined ? ClassComponent.contextType.Provider._value : {}
+
   instance.pendingState = instance.state
   instance.pendingProps = props
   // 组件即将挂载
@@ -65,7 +68,7 @@ function mountClassComponent(vnode) {
   const oldVdom = instance.render()
   const dom = createDom(oldVdom)
   vnode.instance = instance // 实例绑定到虚拟节点上面
-  dom.componentDidMount = instance.componentDidMount.bind(instance)
+  dom.componentDidMount = isFunction(instance.componentDidMount) ? instance.componentDidMount.bind(instance) : () => {}
   instance.oldVdom = oldVdom
   instance.dom = dom
   vnode.dom = dom // 把真实dom保存在当前的vnode上面
