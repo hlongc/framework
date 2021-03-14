@@ -1,4 +1,4 @@
-import Component from './Component'
+import { Component, PureComponent } from './Component'
 import { wrapVNode } from '../shared/utils'
 import { createContext } from './Context'
 
@@ -87,6 +87,7 @@ function createRef() {
 const React = {
   createElement,
   Component,
+  PureComponent,
   createRef,
   createContext,
   cloneElement
@@ -95,6 +96,7 @@ const React = {
 export {
   createElement,
   Component,
+  PureComponent,
   createRef,
   createContext,
   cloneElement

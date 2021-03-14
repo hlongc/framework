@@ -60,7 +60,7 @@ function mountClassComponent(vnode) {
   // context赋值
   instance.context = ClassComponent.contextType !== undefined ? ClassComponent.contextType.Provider._value : {}
 
-  instance.pendingState = instance.state
+  instance.pendingState = instance.state || {}
   instance.pendingProps = props
   // 组件即将挂载
   // getDerivedStateFromProps在render之前执行

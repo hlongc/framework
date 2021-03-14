@@ -1,4 +1,4 @@
-import { createDom, render, updateProps } from '../react-dom'
+import { createDom, updateProps } from '../react-dom'
 import { REACT_TEXT } from '../shared/constant'
 import { runHooks, runGetDerivedStateFromProps } from '../shared/utils'
 
@@ -35,7 +35,6 @@ class Updater {
 
   updateClassComponent() {
     const { instance, pendingState } = this
-    // debugger
     if (pendingState.length) {
       instance.pendingState = this.getState() // 无论是否更新组件，state都会更新
       // runHooks(instance, 'componentWillReceiveProps', instance.props, instance.state)
@@ -124,6 +123,26 @@ class Component {
   render() {
     throw new Error('该方法需要子类实现')
   }
+}
+
+class PureComponent extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState)
+  }
+}
+
+function shallowEqual(obj1, obj2) {
+  if (obj1 === obj2) return true
+  if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
+    return false
+  }
+  const keys1 = Object.keys(obj1)
+  const keys2 = Object.keys(obj2)
+  if (keys1.length !== keys2.length) return false
+  for (const key of keys1) {
+    if (obj1[key] !== obj2[key]) return false
+  }
+  return true
 }
 
 /**
@@ -240,7 +259,10 @@ function findDom(vnode) {
 }
 
 export {
-  Component
+  Component,
+  PureComponent
 }
 
-export default Component
+const e = { Component, PureComponent }
+
+export default e
