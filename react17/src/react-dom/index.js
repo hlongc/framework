@@ -1,12 +1,39 @@
 import { addEvent } from './event'
+import { compareTwoVdom } from '../react/Component'
 import { runHooks, runGetDerivedStateFromProps, isFunction } from '../shared/utils'
 import { REACT_TEXT } from '../shared/constant'
 
+const hookStates = []
+let currentIndex = 0
+let schedule
+
 export function render(vnode, container) {
+  mount(vnode, container)
+  schedule = () => {
+    currentIndex = 0
+    compareTwoVdom(container, vnode, vnode)
+  }
+}
+
+function mount(vnode, container) {
   const dom = createDom(vnode)
   container.appendChild(dom)
   // 组件挂载完成
   runHooks(dom, 'componentDidMount')
+}
+
+export function useState(initialState) {
+  let index = currentIndex
+  hookStates[index] = hookStates[index] === undefined ? (isFunction(initialState) ? initialState() : initialState) : hookStates[index]
+  
+  function setState(newState) {
+    if (typeof newState === 'function') {
+      newState = newState(hookStates[index])
+    }
+    hookStates[index] = newState
+    schedule() // 更新
+  }
+  return [hookStates[currentIndex++], setState]
 }
 
 
@@ -40,7 +67,7 @@ export function createDom(vnode) {
   const children = props.children
   // 子元素只有一个且为虚拟节点，那就递归渲染孩子节点
   if (typeof children === 'object' && children !== null && children.type) {
-    render(children, dom)
+    mount(children, dom)
   } else if (Array.isArray(children)) {
     reconcileChildren(dom, children)
   } else { // 普通对象
@@ -89,7 +116,7 @@ function mountFunctionComponent(vnode) {
 
 function reconcileChildren(parentDom, children) {
   children.forEach(child => {
-    render(child, parentDom)
+    mount(child, parentDom)
   })
 }
 

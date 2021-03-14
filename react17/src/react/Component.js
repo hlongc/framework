@@ -152,7 +152,7 @@ function shallowEqual(obj1, obj2) {
  * @param {*} newVdom 新的虚拟dom
  * @param {*} anchor oldVdom的下一个真实dom节点
  */
-function compareTwoVdom(parent, oldVdom, newVdom, anchor = null) {
+export function compareTwoVdom(parent, oldVdom, newVdom, anchor = null) {
   if (oldVdom && newVdom && oldVdom.type === REACT_TEXT && newVdom.type === REACT_TEXT) {
     const dom = newVdom.dom = oldVdom.dom
     if (oldVdom.props.content !== newVdom.props.content) {
