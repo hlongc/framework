@@ -1,61 +1,69 @@
-import React, { createContext, Component } from './react'
+import React, { Component, cloneElement } from './react'
 import { render } from './react-dom';
 
-function getStyle(color) {
-  return { border: `5px solid ${color}`, padding: '5px', margin: '5px' }
-}
-
-const ThemeContext = createContext()
-class Person extends Component {
-  constructor(props) {
-    super(props)
-    this.state = { color: 'red' }
-  }
-
-  changeColor = color => this.setState({ color })
-
-  render() {
-    const value = { color: this.state.color, changeColor: this.changeColor }
-    return (
-      <ThemeContext.Provider value={value}>
-        <div style={{...getStyle(this.state.color), width: 200}}>
-          人
-          <Head />
-          <Body />
-        </div>
-      </ThemeContext.Provider>
-    )  
+// 1、属性代理
+const withLoading = message => OriginComponent => {
+  return class PropertyProxy extends Component {
+    show = () => {
+      const modal = document.createElement('div')
+      modal.innerHTML = `
+        <div id="modal" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;margin:auto; box-sizing: border-box; border: 1px solid #fff; background: rgba(0,0,0,0.3); color: #fff; width: 450px; height: 250px; text-align: center; line-height: 250px;">${message}</div>
+      `
+      document.body.appendChild(modal)
+    }
+    hide = () => {
+      document.getElementById('modal').remove()
+    }
+    render() {
+      const props = { hide: this.hide, show: this.show }
+      return <OriginComponent {...this.props} {...props}/>
+    }
   }
 }
-
- 
-function Head() {
-  return (
-    <ThemeContext.Consumer>
-      {
-        context => (
-          <div style={getStyle(context.color)}>
-            头
-          </div>
-        )
-      }
-    </ThemeContext.Consumer>
-  )
-}
-
-class Body extends Component {
-  static contextType = ThemeContext
+class Modal extends Component {
   render() {
     return (
-      <div style={getStyle(this.context.color)}>
-        身体
+      <div>
+        测试高阶组件
         <p>
-          <button onClick={() => this.context.changeColor('red')}>变红</button>
-          <button onClick={() => this.context.changeColor('green')}>变绿</button>
+          <button onClick={this.props.show}>显示模态框</button>
+          <button onClick={this.props.hide}>隐藏模态框</button>
         </p>
       </div>
     )
   }
 }
 
-render(<Person />, document.getElementById('root'))
+const HOC = withLoading('loading...')(Modal)
+
+// 2、反向继承
+class Button extends Component {
+  componentDidMount() {
+    console.log('Button componentDidMount');
+  }
+  render() {
+    return <button />
+  }
+}
+
+const wrapper = OriginComponent => {
+  return class ReverseInheritance extends OriginComponent {
+    state = { num: 0 }
+    componentDidMount() {
+      console.log('ReverseInheritance componentDidMount')
+      super.componentDidMount()
+    }
+    add = () => this.setState({ num: this.state.num + 1 })
+    render() {
+      const renderVDom = super.render()
+      const cloneEle = cloneElement(renderVDom, {
+        onClick: this.add
+      }, this.state.num)
+      return cloneEle
+    }
+  }
+}
+
+const WrapperButton = wrapper(Button)
+
+render(<WrapperButton />, document.getElementById('root'))
