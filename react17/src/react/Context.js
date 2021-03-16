@@ -8,3 +8,7 @@ export function createContext() {
   }
   return { Provider, Consumer }
 }
+
+export function useContext(createContext) {
+  return createContext.Provider._value
+}

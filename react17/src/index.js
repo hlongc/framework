@@ -1,31 +1,45 @@
-import React, { useState, memo, useMemo, useCallback } from './react'
+import React, { useReducer, useState, useContext, createContext } from './react'
 import { render } from './react-dom';
 
-function Child({ data, addNum }) {
-  console.log('Child render')
-  return (
-    <div>
-      <p>Child num: {data.num}</p>
-      <button onClick={addNum}>+num</button>
-    </div>
-  )
-}
+const CountContext = createContext()
+const ADD = 'ADD'
+const MINUS = 'MINUS'
 
-const MemoChild = memo(Child)
+const initState = { num: 0 }
+
+function reducer(state = initState, action) {
+  switch(action.type) {
+    case ADD:
+      return { ...state, num: state.num + 1 }
+    case MINUS:
+      return { ...state, num: state.num - 1 }
+    default:
+      return state
+  }
+}
 
 function Parent() {
-  console.log('Parent render')
-  const [count, setCount] = useState(5)
-  const [num, setNum] = useState(10)
-  const data = useMemo(() => ({ num }), [num])
-  const addNum = useCallback(() => setNum(num + 1), [num])
+  const { state, dispatch } = useContext(CountContext)
+  const [count, setCount] = useState(666)
   return (
     <div>
-      <p>Parent count: {count}</p>
+      <p>count: { count }</p>
       <button onClick={() => setCount(count + 1)}>count+</button>
-      <MemoChild data={data} addNum={addNum} />
+      <p>num: {state.num}</p>
+      <button onClick={() => dispatch({ type: ADD })}>+</button>
+      <button onClick={() => dispatch({ type: MINUS })}>-</button>
     </div>
   )
 }
 
-render(<Parent />, document.getElementById('root'))
+function App() {
+  const [state, dispatch] = useReducer(reducer, { num: 10 })
+  const value = { state, dispatch }
+  return (
+    <CountContext.Provider value={value}>
+      <Parent />
+    </CountContext.Provider>
+  )
+}
+
+render(<App />, document.getElementById('root'))

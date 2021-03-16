@@ -1,7 +1,7 @@
 import { Component, PureComponent } from './Component'
-import { useState, useMemo, useCallback, memo } from '../react-dom'
+import { useState, useMemo, useCallback, memo, useReducer } from '../react-dom'
 import { wrapVNode } from '../shared/utils'
-import { createContext } from './Context'
+import { createContext, useContext } from './Context'
 
 /**
  * 创建虚拟dom
@@ -91,10 +91,12 @@ const React = {
   PureComponent,
   createRef,
   createContext,
+  useContext,
   cloneElement,
   useState,
   useCallback,
   useMemo,
+  useReducer,
   memo
 }
 
@@ -104,10 +106,12 @@ export {
   PureComponent,
   createRef,
   createContext,
+  useContext,
   cloneElement,
   useState,
   useCallback,
   useMemo,
+  useReducer,
   memo
 }
 

@@ -24,18 +24,33 @@ function mount(vnode, container) {
   runHooks(dom, 'componentDidMount')
 }
 
+// export function useState(initialState) {
+//   let index = currentIndex
+//   hookStates[index] = hookStates[index] === undefined ? (isFunction(initialState) ? initialState() : initialState) : hookStates[index]
+  
+//   function setState(newState) {
+//     if (typeof newState === 'function') {
+//       newState = newState(hookStates[index])
+//     }
+//     hookStates[index] = newState
+//     schedule() // 更新
+//   }
+//   return [hookStates[currentIndex++], setState]
+// }
+
 export function useState(initialState) {
+  return useReducer(null, initialState)
+}
+
+export function useReducer(reducer, initialState) {
   let index = currentIndex
   hookStates[index] = hookStates[index] === undefined ? (isFunction(initialState) ? initialState() : initialState) : hookStates[index]
   
-  function setState(newState) {
-    if (typeof newState === 'function') {
-      newState = newState(hookStates[index])
-    }
-    hookStates[index] = newState
+  function dispatch(action) {
+    hookStates[index] = reducer ? reducer(hookStates[index], action) : action
     schedule() // 更新
   }
-  return [hookStates[currentIndex++], setState]
+  return [hookStates[currentIndex++], dispatch]
 }
 
 export function memo(FunctionComponent) {
