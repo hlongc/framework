@@ -2,6 +2,7 @@ import { addEvent } from './event'
 import { compareTwoVdom } from '../react/Component'
 import { runHooks, runGetDerivedStateFromProps, isFunction } from '../shared/utils'
 import { REACT_TEXT } from '../shared/constant'
+import React, { PureComponent } from '../react'
 
 const hookStates = []
 let currentIndex = 0
@@ -10,6 +11,7 @@ let schedule
 export function render(vnode, container) {
   mount(vnode, container)
   schedule = () => {
+    // debugger
     currentIndex = 0
     compareTwoVdom(container, vnode, vnode)
   }
@@ -34,6 +36,54 @@ export function useState(initialState) {
     schedule() // 更新
   }
   return [hookStates[currentIndex++], setState]
+}
+
+export function memo(FunctionComponent) {
+  return class extends PureComponent {
+    render() {
+      return <FunctionComponent {...this.props} />
+    }
+  }
+}
+
+export function useMemo(factory, deps) {
+  // 第一次进来，初始化
+  if (hookStates[currentIndex] === undefined) {
+    const obj = factory()
+    hookStates[currentIndex++] = [obj, deps]
+    return obj
+  } else {
+    // 比对上一次和现在的依赖项是是否发生了变化
+    const [o, prevDeps] = hookStates[currentIndex]
+    const changed = prevDeps.length !== deps.length || prevDeps.some((item, index) => item !== deps[index])
+    if (changed) {
+      const newObj = factory()
+      hookStates[currentIndex++] = [newObj, deps]
+      return newObj
+    } else {
+      currentIndex++
+      return o
+    }
+  }
+}
+
+export function useCallback(callback, deps) {
+  // 第一次进来，初始化
+  if (hookStates[currentIndex] === undefined) {
+    hookStates[currentIndex++] = [callback, deps]
+    return callback
+  } else {
+    // 比对上一次和现在的依赖项是是否发生了变化
+    const [o, prevDeps] = hookStates[currentIndex]
+    const changed = prevDeps.length !== deps.length || prevDeps.some((item, index) => item !== deps[index])
+    if (changed) {
+      hookStates[currentIndex++] = [callback, deps]
+      return callback
+    } else {
+      currentIndex++
+      return o
+    }
+  }
 }
 
 
@@ -84,6 +134,7 @@ export function createDom(vnode) {
 function mountClassComponent(vnode) {
   const { type: ClassComponent, props } = vnode
   const instance = new ClassComponent(props)
+  instance.state = instance.state || {}
   // context赋值
   instance.context = ClassComponent.contextType !== undefined ? ClassComponent.contextType.Provider._value : {}
 

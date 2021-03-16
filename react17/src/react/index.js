@@ -1,5 +1,5 @@
 import { Component, PureComponent } from './Component'
-import { useState } from '../react-dom'
+import { useState, useMemo, useCallback, memo } from '../react-dom'
 import { wrapVNode } from '../shared/utils'
 import { createContext } from './Context'
 
@@ -92,7 +92,10 @@ const React = {
   createRef,
   createContext,
   cloneElement,
-  useState
+  useState,
+  useCallback,
+  useMemo,
+  memo
 }
 
 export {
@@ -102,7 +105,10 @@ export {
   createRef,
   createContext,
   cloneElement,
-  useState
+  useState,
+  useCallback,
+  useMemo,
+  memo
 }
 
 export default React
