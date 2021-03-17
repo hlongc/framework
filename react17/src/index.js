@@ -1,45 +1,37 @@
-import React, { useReducer, useState, useContext, createContext } from './react'
+import React, { useEffect, useRef, useLayoutEffect } from './react'
 import { render } from './react-dom';
 
-const CountContext = createContext()
-const ADD = 'ADD'
-const MINUS = 'MINUS'
-
-const initState = { num: 0 }
-
-function reducer(state = initState, action) {
-  switch(action.type) {
-    case ADD:
-      return { ...state, num: state.num + 1 }
-    case MINUS:
-      return { ...state, num: state.num - 1 }
-    default:
-      return state
-  }
-}
-
-function Parent() {
-  const { state, dispatch } = useContext(CountContext)
-  const [count, setCount] = useState(666)
-  return (
-    <div>
-      <p>count: { count }</p>
-      <button onClick={() => setCount(count + 1)}>count+</button>
-      <p>num: {state.num}</p>
-      <button onClick={() => dispatch({ type: ADD })}>+</button>
-      <button onClick={() => dispatch({ type: MINUS })}>-</button>
-    </div>
-  )
-}
-
 function App() {
-  const [state, dispatch] = useReducer(reducer, { num: 10 })
-  const value = { state, dispatch }
+  const style = {
+    width: '100px',
+    height: '100px',
+    backgroundColor: 'red'
+  }
+  const div = useRef()
+  useLayoutEffect(() => {
+    div.current.style.WebkitTransform = 'translate(500px)'
+    div.current.style.transition = 'all 0.5s'
+  }, [])
   return (
-    <CountContext.Provider value={value}>
-      <Parent />
-    </CountContext.Provider>
+    <div ref={div} style={style}>测试一下</div>
   )
 }
+
+// function App() {
+//   const [number, setNumber] = useState(0)
+//   useEffect(() => {
+//     const timer = setInterval(() => {
+//       console.log('开启11')
+//       setNumber(number => number + 1)
+//     }, 1000)
+//     return () => {
+//       console.log('清除')
+//       clearInterval(timer)
+//     }
+//   })
+//   return (
+//     <div>{number}</div>
+//   )
+// }
 
 render(<App />, document.getElementById('root'))

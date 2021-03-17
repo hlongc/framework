@@ -47,7 +47,9 @@ export function useReducer(reducer, initialState) {
   hookStates[index] = hookStates[index] === undefined ? (isFunction(initialState) ? initialState() : initialState) : hookStates[index]
   
   function dispatch(action) {
-    hookStates[index] = reducer ? reducer(hookStates[index], action) : action
+    hookStates[index] = reducer ? reducer(hookStates[index], action) : (
+      isFunction(action) ? action(hookStates[index]) : action
+    )
     schedule() // 更新
   }
   return [hookStates[currentIndex++], dispatch]
@@ -99,6 +101,80 @@ export function useCallback(callback, deps) {
       return o
     }
   }
+}
+
+// 宏任务在渲染之后执行
+export function useEffect(callback, deps) {
+  // 第一次进来，初始化
+  if (hookStates[currentIndex] === undefined) {
+    setTimeout(() => {
+      let clearFn = callback()
+      clearFn = isFunction(clearFn) ? clearFn : () => {}
+      hookStates[currentIndex++] = [clearFn, deps]  
+    })
+  } else {
+    // 比对上一次和现在的依赖项是是否发生了变化
+    const [clear, prevDeps] = hookStates[currentIndex]
+    if (!Array.isArray(prevDeps)) {
+      setTimeout(() => {
+        clear()
+        let clearFn = callback()
+        clearFn = isFunction(clearFn) ? clearFn : () => {}
+        hookStates[currentIndex++] = [clearFn, deps]  
+      })
+    } else {
+      const changed = prevDeps.length !== deps.length || prevDeps.some((item, index) => item !== deps[index])
+      if (changed) {
+        clear()
+        setTimeout(() => {
+          let clearFn = callback()
+          clearFn = isFunction(clearFn) ? clearFn : () => {}
+          hookStates[currentIndex++] = [clearFn, deps]  
+        })
+      } else {
+        currentIndex++
+      }
+    }
+  }
+}
+
+// 微任务在渲染之前执行
+export function useLayoutEffect(callback, deps) {
+  // 第一次进来，初始化
+  if (hookStates[currentIndex] === undefined) {
+    queueMicrotask(() => {
+      let clearFn = callback()
+      clearFn = isFunction(clearFn) ? clearFn : () => {}
+      hookStates[currentIndex++] = [clearFn, deps]  
+    })
+  } else {
+    // 比对上一次和现在的依赖项是是否发生了变化
+    const [clear, prevDeps] = hookStates[currentIndex]
+    if (!Array.isArray(prevDeps)) {
+      queueMicrotask(() => {
+        clear()
+        let clearFn = callback()
+        clearFn = isFunction(clearFn) ? clearFn : () => {}
+        hookStates[currentIndex++] = [clearFn, deps]  
+      })
+    } else {
+      const changed = prevDeps.length !== deps.length || prevDeps.some((item, index) => item !== deps[index])
+      if (changed) {
+        clear()
+        queueMicrotask(() => {
+          let clearFn = callback()
+          clearFn = isFunction(clearFn) ? clearFn : () => {}
+          hookStates[currentIndex++] = [clearFn, deps]  
+        })
+      } else {
+        currentIndex++
+      }
+    }
+  }
+}
+
+export function useRef(initialValue) {
+  return { current: initialValue || null }
 }
 
 
