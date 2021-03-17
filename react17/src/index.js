@@ -1,37 +1,35 @@
-import React, { useEffect, useRef, useLayoutEffect } from './react'
-import { render } from './react-dom';
+import React, { useRef, forwardRef, useImperativeHandle } from 'react'
+import { render } from 'react-dom';
+
+function Child(props, ref) {
+  const input = useRef()
+  useImperativeHandle(ref,() => ({
+    focus() {
+      input.current.focus()
+    },
+    remove() {
+      console.log('remove')
+    }
+  }))
+  return <input ref={input} />
+}
+
+const ForwardChild = forwardRef(Child)
 
 function App() {
-  const style = {
-    width: '100px',
-    height: '100px',
-    backgroundColor: 'red'
+  const child = useRef()
+  function focus() {
+    child.current.focus()
+    child.current.remove()
+    // child.current.blur()
   }
-  const div = useRef()
-  useLayoutEffect(() => {
-    div.current.style.WebkitTransform = 'translate(500px)'
-    div.current.style.transition = 'all 0.5s'
-  }, [])
   return (
-    <div ref={div} style={style}>测试一下</div>
+    <div>
+      <ForwardChild ref={child} />
+      <button onClick={focus}>聚焦</button>
+    </div>
   )
 }
 
-// function App() {
-//   const [number, setNumber] = useState(0)
-//   useEffect(() => {
-//     const timer = setInterval(() => {
-//       console.log('开启11')
-//       setNumber(number => number + 1)
-//     }, 1000)
-//     return () => {
-//       console.log('清除')
-//       clearInterval(timer)
-//     }
-//   })
-//   return (
-//     <div>{number}</div>
-//   )
-// }
 
 render(<App />, document.getElementById('root'))

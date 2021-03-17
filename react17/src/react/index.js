@@ -1,5 +1,5 @@
 import { Component, PureComponent } from './Component'
-import { useState, useMemo, useCallback, memo, useReducer, useEffect, useLayoutEffect, useRef } from '../react-dom'
+import { useState, useMemo, useCallback, memo, useReducer, useEffect, useLayoutEffect, useRef, forwardRef, useImperativeHandle } from '../react-dom'
 import { wrapVNode } from '../shared/utils'
 import { createContext, useContext } from './Context'
 
@@ -100,6 +100,8 @@ const React = {
   useEffect,
   useLayoutEffect,
   useRef,
+  useImperativeHandle,
+  forwardRef,
   memo
 }
 
@@ -118,6 +120,8 @@ export {
   useEffect,
   useLayoutEffect,
   useRef,
+  useImperativeHandle,
+  forwardRef,
   memo
 }
 

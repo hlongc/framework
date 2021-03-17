@@ -2,7 +2,7 @@ import { addEvent } from './event'
 import { compareTwoVdom } from '../react/Component'
 import { runHooks, runGetDerivedStateFromProps, isFunction } from '../shared/utils'
 import { REACT_TEXT } from '../shared/constant'
-import React, { PureComponent } from '../react'
+import React, { Component, PureComponent } from '../react'
 
 const hookStates = []
 let currentIndex = 0
@@ -177,6 +177,19 @@ export function useRef(initialValue) {
   return { current: initialValue || null }
 }
 
+export function forwardRef(FunctionComponent) {
+  return class ForwardRef extends Component {
+    render() {
+      console.log(this.props, this.ref)
+      return FunctionComponent(this.props, this.ref)
+    }
+  }
+}
+
+export function useImperativeHandle(ref, handler) {
+  ref.current = handler()
+}
+
 
 /**
  * 根据虚拟节点创建真实dom
@@ -212,7 +225,7 @@ export function createDom(vnode) {
   } else if (Array.isArray(children)) {
     reconcileChildren(dom, children)
   } else { // 普通对象
-    dom.textContent = children.toString ? children.toString() : ''
+    dom.textContent = children && children.toString ? children.toString() : ''
   }
   vnode.dom = dom
   return dom
@@ -223,7 +236,7 @@ export function createDom(vnode) {
  * @param {*} vnode 虚拟节点
  */
 function mountClassComponent(vnode) {
-  const { type: ClassComponent, props } = vnode
+  const { type: ClassComponent, props, ref } = vnode
   const instance = new ClassComponent(props)
   instance.state = instance.state || {}
   // context赋值
@@ -231,6 +244,11 @@ function mountClassComponent(vnode) {
 
   instance.pendingState = instance.state || {}
   instance.pendingProps = props
+
+  // forwardRef会用到
+  if (ref) {
+    instance.ref = ref
+  }
   // 组件即将挂载
   // getDerivedStateFromProps在render之前执行
   runGetDerivedStateFromProps(instance, instance.pendingProps, instance.pendingState)
