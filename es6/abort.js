@@ -1,23 +1,30 @@
-const wrap = promise => {
+const wrapper = p1 => {
   let abort
-  const myPromise = new Promise((_, reject) => {
+  const p2 = new Promise((resolve, reject) => {
     abort = reject
   })
-  const result = Promise.race([promise, myPromise])
-  result.abort = abort
-  return result
+  const p = Promise.race([p1, p2])
+  p.abort = abort
+  return p
 }
 
-const p = wrap(new Promise((resolve) => {
+const p = new Promise(resolve => {
   setTimeout(() => {
     resolve('我来了')
-  }, 10000)
-}))
+  }, 5000)
+})
 
-p.then(r => {
-  console.log(r)
-}).catch(console.log)
+const w = wrapper(p)
+
+w.then((v) => {
+  console.log('resolve', v)
+}).catch(e => {
+  console.log('catch', e)
+})
 
 setTimeout(() => {
-  p.abort('我放弃了这个promise了')
+  w.abort('不要了')
 }, 2000)
+
+
+

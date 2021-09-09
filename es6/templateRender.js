@@ -16,8 +16,8 @@ function render(template, data) {
 const res = render(str, info)
 console.log(res)
 
-let name = 'react-element-ui'
-name = name.replace(/-\w/g, function() {
+let input = 'react-element-ui'
+input = input.replace(/-\w/g, function() {
   return arguments[0].slice(1).toUpperCase()
 })
-console.log(name)
+console.log(input)

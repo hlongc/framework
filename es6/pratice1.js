@@ -257,7 +257,7 @@ class Promise {
     return promise2
   }
   catch(fn) {
-    return this.then(_, fn)
+    return this.then(null, fn)
   }
   finally(cb) {
     return this.then(
@@ -267,13 +267,28 @@ class Promise {
   }
 }
 
-Promise.resolve(123)
-  .finally(() => {
-    console.log('finally');
-  })
-  .then(x => {
-    console.log(x);
-  });
+// Promise.resolve(123)
+//   .finally(() => {
+//     console.log('finally');
+//   })
+//   .then(x => {
+//     console.log(x);
+//   });
+
+const p1 = new Promise((_resolve, reject) => {
+  setTimeout(() => {
+    reject(new Error('fail'))
+  }, 3000)
+})
+
+const p2 = new Promise(resolve => {
+  setTimeout(() => {
+    resolve(p1)
+  }, 1000)
+})
+
+const res = p2.then(console.log).catch(console.error)
+console.log('res', res)
 
 // const sleep = s => {
 //   return new Promise(resolve => {

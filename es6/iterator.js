@@ -21,6 +21,6 @@ if (true) {
   a = 2;
   function a() { };
   a = 3;
-  // console.log('内部:', a);
+  console.log('内部:', a);
 }
-// console.log('外部:', a)
+console.log('外部:', a)

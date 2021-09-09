@@ -31,23 +31,3 @@ function formatter(obj) {
 }
 
 console.log(formatter(obj))
-
-// const a = [1, 2, 3]
-// a.join = a.shift
-// console.log(a == 1 && a == 2 && a == 3)
-
-const a = {
-  value: 1,
-  [Symbol.toPrimitive]() {
-    return this.value++
-  },
-  valueOf() {
-    return this.value++
-  },
-  toString() {
-    return this.value++
-  }
-}
-
-console.log(a == 1 && a == 2 && a == 3)
-// console.log(a + 1)

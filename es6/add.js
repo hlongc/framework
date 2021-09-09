@@ -1,20 +1,32 @@
-function add() {
-  function originAdd(...args) {
-    return args.reduce((total, cur) => {
-      return total + cur
-    }, 0)
-  }
-  const all = []
-  all.push(...arguments)
-  if (all.length === 5) {
-    return originAdd(...all)
-  }
-  return function inner() {
-    all.push(...arguments)
-    return all.length === 5 ? originAdd(...all) : inner
-  }
+
+function test1() {
+  return new Promise((reoslve, reject) => {
+    setTimeout(() => {
+      reoslve('test1')
+    }, 2000)
+  })
 }
 
-console.log(add(1, 2, 3, 4, 5))
-console.log(add(1)(2)(3)(4)(5))
-console.log(add(1, 2, 3)(4)()(5))
+
+function test2() {
+  return new Promise((reoslve, reject) => {
+    setTimeout(() => {
+      reject('test2')
+    }, 2500)
+  })
+}
+
+
+function test3() {
+  return new Promise((reoslve, reject) => {
+    setTimeout(() => {
+      reoslve('test3')
+    }, 2500)
+  })
+}
+
+Promise.race([test1(), test2(), test3()]).then(x => {
+  console.log('success', x)
+}).catch(r => {
+  console.log('fail', r)
+})

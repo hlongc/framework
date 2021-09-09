@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      function model(state, element) {
+        // your code here
+        let value = state.value;
+        Object.defineProperty(state, "value", {
+          enumerable: false,
+          configurable: true,
+          get() {
+            return value;
+          },
+          set(newVal) {
+            if (newVal !== value) {
+              value = newVal;
+              element.value = value;
+            }
+          },
+        });
+        element.onchange = () => {
+          state.value = element.value;
+        };
+      }
+
+      const input = document.createElement("input");
+      const state = { value: "BFE" };
+      model(state, input);
+
+      console.log(input.value); // 'BFE'
+      state.value = "dev";
+      console.log(input.value); // 'dev'
+      input.value = "BFE.dev";
+      input.dispatchEvent(new Event("change"));
+      console.log(state.value); // 'BFE.dev'
+    </script>
+  </body>
+</html>

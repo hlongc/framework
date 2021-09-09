@@ -13,37 +13,53 @@ const obj1 = {
 }
 obj1.d = obj1;
 
-function deepClone(obj, cache = new WeakMap()) {
-  if (typeof obj !== 'object' || obj === null) {
-    return obj
+function deepClone(target, cache = new WeakMap) {
+  // 函数和Symbol直接复用之前的
+  if (typeof target === 'function' || typeof target === 'symbol') {
+    return target
   }
-  if (typeof obj === 'function') return obj // 不拷贝函数，直接返回
-  if (cache.has(obj)) return cache.get(obj) // 解决循环引用
-  const Constructor = obj.constructor // 拿到当前对象的构造函数
-  let ins
-  switch(Constructor) {
-    case Boolean:
-    case Date:
-      return new Date(+obj)
+  // 非对象不处理
+  if (typeof target !== 'object' || target === null) {
+    return target
+  }
+  if (cache.has(target)) {
+    return cache.get(target)
+  }
+  // 获取构造函数
+  const Constructor = target.constructor
+  let ret
+  switch (Constructor) {
     case Number:
     case String:
+    case Boolean:
+    case Date:
+      ret = new Constructor(target)
+      cache.set(target, ret)
+      return ret
     case RegExp:
-      return new Constructor(obj)
+      ret = new RegExp(target.source, target.flags)
+      ret.lastIndex = target.lastIndex
+      cache.set(target, ret)
+      return ret
+    // 处理对象
     default:
-      ins = new Constructor()
-      cache.set(obj, ins) // 建立映射关系
+      ret = Array.isArray(target) ? Array(target.length) : Object.create(Reflect.getPrototypeOf(target))
+      cache.set(target, ret) // 克隆前后形成映射关系，可以解决循环引用
+      break;
   }
-  if (Array.isArray(ins)) {
-    obj.forEach(item => {
-      ins.push(deepClone(item, cache))
-    })
-    return ins
+  if (Array.isArray(target)) {
+    for (let i = 0; i < target.length; i++) {
+      // [1,2,3,,4] 稀疏数组中跳过空元素
+      if (i in target) {
+        ret[i] = deepClone(target[i], cache)
+      }
+    }
+    return ret
   } else {
-    // 解决取不到symbol的情况
-    return [...Object.getOwnPropertyNames(obj), ...Object.getOwnPropertySymbols(obj)].reduce((memo, key) => {
-      memo[key] = deepClone(obj[key], cache)
+    return Reflect.ownKeys(target).reduce((memo, key) => {
+      memo[key] = deepClone(target[key], cache)
       return memo
-    }, Object.create(obj.constructor.prototype))
+    }, ret)
   }
 }
 

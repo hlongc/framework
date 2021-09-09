@@ -1,15 +1,15 @@
-const removeDuplicates = nums => {
-  if (nums.length == 0) return 0
-  let i = 0
-  const len = nums.length
-  for (let j = 1; j < len; j++) {
-    if (nums[j] !== nums[i]) {
-      i++
-      nums[i] = nums[j]
-    }
-  }
-  return i + 1
-}
+// const removeDuplicates = nums => {
+//   if (nums.length == 0) return 0
+//   let i = 0
+//   const len = nums.length
+//   for (let j = 1; j < len; j++) {
+//     if (nums[j] !== nums[i]) {
+//       i++
+//       nums[i] = nums[j]
+//     }
+//   }
+//   return i + 1
+// }
 
 const removeDuplicates = function (nums) {
   let j = 0
