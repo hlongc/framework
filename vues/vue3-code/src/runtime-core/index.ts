@@ -299,6 +299,7 @@ export function createRenderer(nodeOps: OptionsType) {
   function setupRenderEffect(instance: ComponentProps, el: HTMLElement) {
     // 每个组件对应一个effect
     effect(() => {
+      debugger
       if (!instance.isMounted && instance.render) { // 第一次挂载
         const subTree = instance.subTree = instance.render()
         patch(null, subTree , el)

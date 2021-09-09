@@ -1,12 +1,14 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
+const path = require('path')
 
 const app = express()
 app.use(cookieParser())
+app.use(express.static(path.resolve(__dirname, './')))
 
 app.all('*', (req, res, next) => {
-  // 如果设置为 * 的话，是无法带上cookie的
   res.setHeader('Access-Control-Allow-Credentials', true) // 跨域时允许携带cookie
+  // 如果设置为 * 的话，是无法带上cookie的
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || 'http://127.0.0.1:5500')
   res.setHeader('Access-Control-Allow-Method', 'PUT,POST,GET,DELETE,OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', '*')
@@ -22,6 +24,7 @@ app.get('/test/jsonp', (req, res) => {
     data: 'xixi'
   }
   // 调用客户端的callback方法并执行
+  res.setHeader('Content-Type', 'application/json')
   res.send(`${callback}(${JSON.stringify(result)})`)
 })
 

@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex from './vuex'
+import Vuex from 'vuex'
 import { cloneDeep } from 'lodash'
 
 Vue.use(Vuex)
@@ -24,6 +24,7 @@ function persist(store) {
 }
 
 const store = new Vuex.Store({
+  // strict: true,
   modules: {
     a: {
       namespaced: true,

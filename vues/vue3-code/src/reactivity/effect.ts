@@ -52,7 +52,7 @@ const effectMap = new WeakMap
 
 // 依赖收集
 export function track(target: object, key: string | symbol) {
-  // 不存在就不用跟踪了，比如只是简单的取值
+  // 不存在就不用跟踪了，比如只是简单的取值，比如只是简单的console.log(obj.a)就不用追踪了，只追踪在effect中执行的情况
   if (activeEffect) {
     let depsMap = effectMap.get(target)
     if (!depsMap) {

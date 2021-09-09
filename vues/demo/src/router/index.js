@@ -5,21 +5,27 @@ import NotFound from '@/components/404'
 import Example from '@/components/Example'
 import Drag from '@/components/Drag.vue'
 import Setting from '@/components/setting.vue'
-import User from '@/components/UserMange.vue'
+// import User from '@/components/UserMange.vue'
 import Message from '@/components/MesMange.vue'
 import VueContainer from '@/components/Vue.vue'
+import User from '@/components/user.vue'
+import Dashboard from '../dashboard.vue'
 
 Vue.use(Router)
 
 const routes = [
   {
     path: '/',
-    redirect: '/home'
+    component: Dashboard
   },
   {
     path: '/home',
     component: Home,
     meta: { title: '首页' }
+  },
+  {
+    path: '/user/:username',
+    component: User
   },
   {
     path: '/drag',

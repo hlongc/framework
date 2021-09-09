@@ -8,7 +8,6 @@ export default class CancelToken {
         this.resolve = resolve
       }),
       cancel: (message: any) => {
-        console.log(this)
         this.resolve(new Cancel(message))
       }
     }

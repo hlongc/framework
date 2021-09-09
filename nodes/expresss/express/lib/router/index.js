@@ -96,7 +96,7 @@ proto.handle = function (req, res, out) {
       removePrefix = ''
     }
     if (err) { // 如果有错误，要交给错误中间件来处理
-      if (!layer.router) { // 当前是中间件就尝试进行处理
+      if (!layer.route) { // 当前是中间件就尝试进行处理
         layer.handle_error(err, req, res, next)
       } else { // 不是中间件就继续往下面传递
         next(err)

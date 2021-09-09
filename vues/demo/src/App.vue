@@ -1,24 +1,23 @@
 <template>
   <div id="app">
-    <el-container>
-      <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-        <MyMenu :data="data" />
-      </el-aside>
-      <el-main>
-        <router-view />
-      </el-main>
-    </el-container>
+      <router-view></router-view>
   </div>
 </template>
 
 <script>
 import router from '@/router'
 import MyMenu from './components/MyMenu.vue'
+import WaterMask from './WaterMask.vue'
+import DDD from './DDD.vue'
+import Login from './login.vue'
 
 export default {
   name: 'App',
   components: {
-    MyMenu
+    MyMenu,
+    WaterMask,
+    DDD,
+    Login
   },
   data() {
     return {
@@ -42,16 +41,6 @@ export default {
 
 <style lang="less" scoped>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
   height: 100%;
-  .el-container {
-    height: 100%;
-    .el-aside {
-      width: 200px;
-    }
-  }
 }
 </style>

@@ -10,6 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "mime": "^2.4.6"
+  },
+  "devDependencies": {
+    "postcss-selector-parser": "^6.0.4"
   }
 }
